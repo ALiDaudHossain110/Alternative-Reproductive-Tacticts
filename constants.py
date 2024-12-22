@@ -186,24 +186,6 @@ def clear_genomes_offspring():
     genomes_offspring.clear()
 
 
-# def add_genome_to_offspring(genom_list,genomeid):
-#     """Adds a genome to the genomes_offspring dictionary."""
-#     global genomes_offspring
-
-#     genomes_offspring.clear()
-#       # Add or update the genome entry
-#     for genome, gid in zip(genom_list,genomeid):
-#         genomes_offspring [gid]=genome
-#         add_genomes_archive(gid,genome)
-
-
-# def add_genomes_archive(genome_id, genome_object):
-#     """Adds a genome to the genomes_offspring dictionary."""
-#     global genomes_archive
-#     genomes_archive[genome_id] = genome_object  # Add or update the genome entry
-
-
-
 def update_genome_fitness(iternum, fitness):
     
     global ge
@@ -225,30 +207,6 @@ def update_agent_info(agent,output6):
     else:
         agent.dir_selec=1
     
-    # value=softmax(np.array([output4, output5]))
-    # # Scale to a maximum of 3
-    # output4 = value[0] * 3
-    # output5 = value[1] * 3
-
-    # # Clamping the values to be within [-3, 3]
-    # output4 = round(max(min(3, output4),-3),2)
-    # output5 = round(max(min(3, output5),-3),2)
-
-    # if output4 > 3:
-    #     print(f"Warning: Left wheel speed exceeded 3: {output4}")
-    # if output5 > 3:
-    #     print(f"Warning: Right wheel speed exceeded 3: {output5}")
-
-    # # Assign the calculated wheel speeds to the agent
-    # agent.left_wheel_speed = output4
-    # agent.right_wheel_speed = output5
-
-    # # Debugging print statement in case values exceed 3
-    # if output4 > 3:
-    #     print(f"Warning: Left wheel speed exceeded 3: {output4}")
-    # if output5 > 3:
-    #     print(f"Warning: Right wheel speed exceeded 3: {output5}")
-
 
 def add_agent_at_reproduction_file(agent):
     global agents2

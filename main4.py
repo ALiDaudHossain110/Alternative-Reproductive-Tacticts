@@ -174,7 +174,7 @@ while run:
                     c.dead_agent_bucket_list.append(new_agent)
                     c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
 
-        loop=100-len(agent_group)
+        loop=50-len(agent_group)
         if loop>0:
             for _ in range(loop):
                 gene=Genome() 

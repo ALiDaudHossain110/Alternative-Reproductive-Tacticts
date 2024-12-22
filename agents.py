@@ -66,11 +66,11 @@ class Agent(pg.sprite.Sprite):
         self.font = pg.font.Font(None, 30)
 
         self.state_counter_dict={
-            "moving_to_food":[0]*500,
-            "waiting":[0]*500,
-            "mating as male":[0]*500,
-            "mating as female":[0]*500,
-            "searching_for_food":[0]*500,
+            "moving_to_food":[0]*550,
+            "waiting":[0]*550,
+            "mating as male":[0]*550,
+            "mating as female":[0]*550,
+            "searching_for_food":[0]*550,
         }
 
     def state_stat(self):
@@ -538,34 +538,6 @@ class Agent(pg.sprite.Sprite):
         self.gender="m"
         self.appearance(self.gender,self.body_size,self.rect.center)
 
-        # if self.dir_selec==0:
-        #     if self.nearby_agents_face:
-        #         agent= self.nearby_agents_face[0]
-        #         if agent is not self and agent.gender != self.gender:
-        #             self.move_to(agent.rect.center,agents)
-        #             self.interact(agents,agent_group2)
-        #         else:
-
-        #             self.state='wandering'
-        
-
-        #     else:
-
-        #         self.state='wandering'
-
-        # if self.dir_selec==1:
-        #     if self.nearby_agents_back:
-        #         agent= self.nearby_agents_back[0]
-        #         if agent is not self and agent.gender != self.gender:
-        #             self.move_to(agent.rect.center,agents)
-        #             self.interact(agents,agent_group2)
-        #         else:
-
-        #             self.state='wandering'
-
-        #     else:
-
-        #         self.state='wandering'
         if self.nearby_agents:
             if self.nearby_agents_face_dist and self.nearby_agents_back_dist:
                 if self.nearby_agents_face_dist[0]<self.nearby_agents_back_dist[0]:
@@ -583,34 +555,7 @@ class Agent(pg.sprite.Sprite):
 
         self.gender="f"
         self.appearance(self.gender,self.body_size,self.rect.center)
-        # if self.dir_selec==0:
-        #     if self.nearby_agents_face:
-        #         agent= self.nearby_agents_face[0]
-        #         if agent is not self and agent.gender != self.gender:
-        #             self.move_to(agent.rect.center,agents)
-        #             self.interact(agents,agent_group2)
-        #         else:
 
-        #             self.state='wandering'
-        
-
-        #     else:
-
-        #         self.state='wandering'
-
-        # if self.dir_selec==1:
-        #     if self.nearby_agents_back:
-        #         agent= self.nearby_agents_back[0]
-        #         if agent is not self and agent.gender != self.gender:
-        #             self.move_to(agent.rect.center,agents)
-        #             self.interact(agents,agent_group2)
-        #         else:
-
-        #             self.state='wandering'
-
-        #     else:
-
-        #         self.state='wandering'
 
         if self.nearby_agents:
             if self.nearby_agents_face_dist and self.nearby_agents_back_dist:
@@ -689,12 +634,6 @@ class Agent(pg.sprite.Sprite):
                             # c.ge2.append(child_genome)
                             # print("reproduced")
                                 c.genome_id.append(c.genomeid)                                
-                        # self.state='post_mating_state'
-                            # screen.blit(self.font.render(f"!!!!!!", True, c.WHITE), (self.rect.x, self.rect.y))
-                            # screen.blit(self.font.render(f"!!!!!!", True, c.WHITE), (self.rect.x, self.rect.y))
-                            # screen.blit(self.font.render(f"!!!!!!", True, c.WHITE), (self.rect.x, self.rect.y))
-                            # screen.blit(self.font.render(f"!!!!!!", True, c.WHITE), (self.rect.x, self.rect.y))
-                            # screen.blit(self.font.render(f"!!!!!!", True, c.WHITE), (self.rect.x, self.rect.y))
 
                         female.energy_level -= 20
                         female.can_reproduce = False  # Female needs to wait until aging to reproduce again
@@ -789,9 +728,6 @@ class Agent(pg.sprite.Sprite):
             self.right_wheel_speed = -self.right_wheel_speed  # Reverse the other side for turning
 
         self.clamp_speed()
-        # self.left_wheel_speed=min(self.left_wheel_speed,6)
-        # self.right_wheel_speed=min(self.right_wheel_speed,6)
-        # Update the wheel speeds
         self.left_wheel_speed = round(self.left_wheel_speed, 2)
         self.right_wheel_speed = round(self.right_wheel_speed, 2)
         self.energy_level-=0.05
@@ -837,9 +773,6 @@ class Agent(pg.sprite.Sprite):
         # self.age += 1
         self.appearance(self.gender,self.body_size,self.rect.center)
 
-        # if self.gender == "f":
-        #     if self.
-        #     self.can_reproduce = True  # Allow reproduction again after aging
         if self.age > 5000:
             self.kill()
    
