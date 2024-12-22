@@ -165,10 +165,10 @@ class Agent(pg.sprite.Sprite):
 
         for food in food_group:
             if self.energy_level < 500:
-                if self.check_edge_in_vision(food,self.vision_angle):
-                    direction_to_food = pg.Vector2(food.rect.centerx - self.rect.centerx, food.rect.centery - self.rect.centery)
-                    if direction_to_food.length() <= self.sight_radius:
-                            self.nearby_food.append(food)
+                # if self.check_edge_in_vision(food,self.vision_angle):
+                direction_to_food = pg.Vector2(food.rect.centerx - self.rect.centerx, food.rect.centery - self.rect.centery)
+                if direction_to_food.length() <= self.sight_radius:
+                        self.nearby_food.append(food)
 
 
         # First, calculate the distances and store the agents with their distances in a temporary list
@@ -180,18 +180,18 @@ class Agent(pg.sprite.Sprite):
         for agent in agents:
             if agent is not self:
                 if self.age > 0 and self.energy_level > 3:
-                    if self.check_edge_in_vision(food,self.vision_angle_mating):
+                    # if self.check_edge_in_vision(food,self.vision_angle_mating):
 
-                        direction_to_agent = pg.Vector2(agent.rect.centerx - self.rect.centerx, agent.rect.centery - self.rect.centery)
-                        if direction_to_agent.length() <= self.sight_radius:
-                                # Add the agent and its distance to a temporary list
-                                temp_nearby_agents.append((agent, direction_to_agent.length()))
-                                dist_to_front,dist_to_back=self.dist_face_back(agent)
-                                check_face=self.check_faceing_or_not(agent)
-                                if check_face:
-                                    temp_nearby_agents_front.append((agent,dist_to_front))
-                                else:
-                                    temp_nearby_agents_back.append((agent,dist_to_back))
+                    direction_to_agent = pg.Vector2(agent.rect.centerx - self.rect.centerx, agent.rect.centery - self.rect.centery)
+                    if direction_to_agent.length() <= self.sight_radius:
+                            # Add the agent and its distance to a temporary list
+                            temp_nearby_agents.append((agent, direction_to_agent.length()))
+                            dist_to_front,dist_to_back=self.dist_face_back(agent)
+                            check_face=self.check_faceing_or_not(agent)
+                            if check_face:
+                                temp_nearby_agents_front.append((agent,dist_to_front))
+                            else:
+                                temp_nearby_agents_back.append((agent,dist_to_back))
 
 
         # Sort the temporary list by the distance (ascending order)
@@ -308,7 +308,7 @@ class Agent(pg.sprite.Sprite):
         agent_center = pg.Vector2(self.rect.centerx, self.rect.centery)
 
         # Get the center coordinates of the first nearby food item,agent center,other center.
-        if self.nearby_food is not None and len(self.nearby_food) >0:
+        if len(self.nearby_food) >0:
             food_center = pg.Vector2(self.nearby_food[0].rect.centerx, self.nearby_food[0].rect.centery)
             dist_to_food = food_center.distance_to(agent_center)
 
@@ -322,14 +322,14 @@ class Agent(pg.sprite.Sprite):
 
         else:
             # If there is no nearby food, set default values
-            dist_to_other_face = -1
+            dist_to_other_face = 0
 
         if len(self.nearby_agents_back_dist) > 0:
             dist_to_other_back = self.nearby_agents_back_dist[0]
 
         else:
             # If there is no nearby food, set default values
-            dist_to_other_back = -1
+            dist_to_other_back = 0
 
         direction=self.norm_direction(self.direction_to_move[0],self.direction_to_move[1])#normalizing the direction
 
@@ -835,8 +835,6 @@ class Agent(pg.sprite.Sprite):
     def increment_age(self):
         
         # self.age += 1
-        if self.age<3000:
-            self.body_size += 0.75
         self.appearance(self.gender,self.body_size,self.rect.center)
 
         # if self.gender == "f":

@@ -10,7 +10,7 @@ class Food(pg.sprite.Sprite):
         x="yn"
         choose=random.choice(x)
         if choose=="y":
-            self.energy = 50  # Random energy level for the food
+            self.energy = 100  # Random energy level for the food
             self.radius = 6  # Random radius for the food
             # Load and scale the food image
             image_path = 'images/food1.png'
@@ -27,7 +27,7 @@ class Food(pg.sprite.Sprite):
 
         if choose=="n":
             # self.energy = random.randint(5, 7)  # Random energy level for the foody
-            self.energy = 50  # Random energy level for the food
+            self.energy = 100  # Random energy level for the food
             self.radius = 6  # Random radius for the food
             # Load and scale the food image
             image_path = 'images/food2.png'

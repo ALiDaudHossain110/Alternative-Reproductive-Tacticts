@@ -6,7 +6,7 @@ clock = pg.time.Clock()
 
 
 # Screen dimensions
-screen_width = 1300
+screen_width = 700
 screen_height = 700
 
 # screen_width = 250

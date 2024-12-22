@@ -37,7 +37,7 @@ for _ in range(initial_food):
     food_group.add(food)
 
 # Initial agent population
-initial_population = 100
+initial_population = 50
 for _ in range(initial_population):
     gene=Genome()
     inter_genome(gene,agent_group)
@@ -66,6 +66,8 @@ while run:
             #     print("=====================================")    
             if agent.mating_state_timer==4:#not in mating period
                 nn=NeuralNetwork()
+                # print("agent : ", i)
+                # print("agent data: ", agent.data())
                 output=nn.forward(agent.data(),agent.genome.gene)
 
                 # if i <20:
@@ -157,9 +159,9 @@ while run:
         print("size of children list:",agent_group2)
         # Randomly select agents from `agent_group2` until `agent_group` reaches 100 agents
         # if len(agent_group2)>120:
-        if len(agent_group2)>125:
+        if len(agent_group2)>60:
             for new_agent in agent_group2:
-                if len(agent_group)<100:
+                if len(agent_group)<50:
                     choice=random.choice(["y","n"])
                     if choice == "y":
                         agent_group.add(new_agent)
@@ -167,7 +169,7 @@ while run:
                         c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
         else:
             for new_agent in agent_group2:
-                if len(agent_group)<=100:
+                if len(agent_group)<=50:
                     agent_group.add(new_agent)
                     c.dead_agent_bucket_list.append(new_agent)
                     c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
@@ -195,11 +197,11 @@ while run:
     population = len(agent_group)
     if population > 0:
         highest_generation = max(agent.generation_no for agent in agent_group)
-        font = pg.font.Font(None, 20)
+        font = pg.font.Font(None, 15)
         text = font.render(f"Population: {population} Highest Generation: {highest_generation}", True, c.WHITE)
     text2 = font.render(f"CLOCK : {hour} hr: {min} min: {sec} sec", True, c.WHITE)
-    text4 = font.render(f"Population set number: {c.pop_set_num}", True, c.WHITE)
-    text3 = font.render(f"Agents children length: {len(agent_group2)}", True, c.WHITE)
+    text4 = font.render(f"Population number: {c.pop_set_num}", True, c.WHITE)
+    text3 = font.render(f"children length: {len(agent_group2)}", True, c.WHITE)
     text5 = font.render(f"No. of food: {len(food_group)}", True, c.WHITE)
     prnt(text5, 0.7)
     prnt(text3, 0.5)
