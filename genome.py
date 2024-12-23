@@ -14,10 +14,10 @@ class Genome():
     def reproduce(self, genome,male_genome, female_genome,g):
         
         
-        offspring_gene=self.Mutate(self.CrossOver(genome,male_genome,female_genome,g), mutation_rate=0.1, standard_deviation=0.1)
+        offspring_gene=self.Mutate(self.CrossOver(genome,male_genome,female_genome,g), mutation_rate=0.2, standard_deviation=0.1)
         return offspring_gene
 
-    def CrossOver(self, offspring_gene, male_genome, female_genome,g,crossover_rate=0.2):
+    def CrossOver(self, offspring_gene, male_genome, female_genome,g,crossover_rate=0.3):
 
         if np.random.rand() < crossover_rate:  # Check if crossover occurs
             # Take the first half from the male genome
@@ -44,7 +44,7 @@ class Genome():
 
 
 
-    def Mutate(self, offspring_gene, mutation_rate=0.2,standard_deviation=0.1):
+    def Mutate(self, offspring_gene, mutation_rate=0.1,standard_deviation=0.1):
 
         if np.random.rand() < mutation_rate:  # Check if mutation occurs
             # random_row=random.randint(0,5)

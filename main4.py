@@ -37,7 +37,7 @@ for _ in range(initial_food):
     food_group.add(food)
 
 # Initial agent population
-initial_population = 50
+initial_population = c.totalpop
 for _ in range(initial_population):
     gene=Genome()
     inter_genome(gene,agent_group)
@@ -64,7 +64,7 @@ while run:
             #     print(f"Inputs for agent  {agent.data()}")
             # else:
             #     print("=====================================")    
-            if agent.mating_state_timer==4:#not in mating period
+            if agent.mating_state_timer==c.mating_state_timer_counter:#not in mating period
                 nn=NeuralNetwork()
                 # print("agent : ", i)
                 # print("agent data: ", agent.data())
@@ -159,9 +159,10 @@ while run:
         print("size of children list:",agent_group2)
         # Randomly select agents from `agent_group2` until `agent_group` reaches 100 agents
         # if len(agent_group2)>120:
-        if len(agent_group2)>60:
+        totl=1.5*c.totalpop
+        if len(agent_group2)>totl:
             for new_agent in agent_group2:
-                if len(agent_group)<50:
+                if len(agent_group)<c.totalpop:
                     choice=random.choice(["y","n"])
                     if choice == "y":
                         agent_group.add(new_agent)
@@ -169,12 +170,12 @@ while run:
                         c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
         else:
             for new_agent in agent_group2:
-                if len(agent_group)<=50:
+                if len(agent_group)<=c.totalpop:
                     agent_group.add(new_agent)
                     c.dead_agent_bucket_list.append(new_agent)
                     c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
 
-        loop=50-len(agent_group)
+        loop=c.totalpop-len(agent_group)
         if loop>0:
             for _ in range(loop):
                 gene=Genome() 
@@ -206,7 +207,7 @@ while run:
     prnt1(text5, 0.7)
     prnt1(text3, 0.3)
     prnt1(text2, 0.01)
-    prnt(text4, 0.3)
+    prnt(text4, 0.6)
     prnt(text, 0.01)
 
     # Event handler

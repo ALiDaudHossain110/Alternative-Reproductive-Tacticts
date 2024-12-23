@@ -16,7 +16,7 @@ def prnt(text, percentage):
 
 
 def prnt1(text, percentage):
-    screen.blit(text, (c.screen_width*percentage, 290))
+    screen.blit(text, (c.screen_width*percentage, c.screen_height-20))
 
 def checkmouse(agent_group):
         mouse_pos = pg.mouse.get_pos()

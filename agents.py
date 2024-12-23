@@ -68,6 +68,7 @@ class Agent(pg.sprite.Sprite):
         self.state_counter_dict={
             "moving_to_food":[0]*550,
             "waiting":[0]*550,
+            "wandering":[0]*550,
             "mating as male":[0]*550,
             "mating as female":[0]*550,
             "searching_for_food":[0]*550,
@@ -91,7 +92,7 @@ class Agent(pg.sprite.Sprite):
         self.age=c.loop_counter
         if c.loop_counter%5==0 and c.loop_counter>self.old_timestep:
             
-            self.energy_level -= 1
+            self.energy_level -= 2
             self.old_timestep = c.loop_counter
 
 
@@ -113,45 +114,56 @@ class Agent(pg.sprite.Sprite):
 
         self.rect = self.image.get_rect(center=self.rect.center)
 
-    def check_edge_in_vision(self, other,vision_angle):
-        # Calculate the radius of the other agent or food's body
-        other_radius = other.rect.width / 2  # Assuming the body is circular and the rect is square
+    def check_edge_in_vision(self, other, vision_angle):
+        """
+        Checks if any edge point of the target `other` is within the agent's vision cone.
+        :param other: The target object to check (with a `rect` attribute for position and size).
+        :param vision_angle: The agent's field of view (FOV) in degrees.
+        :return: True if any edge point is within the vision cone, False otherwise.
+        """
 
-        # Check every 10 degrees around the body (you can change this interval)
-        for angle in range(0, 360, 45):
-            # Convert the angle into radians
-            angle_rad = math.radians(angle)
 
-            # Calculate the coordinates of the edge point
-            edge_x = other.rect.centerx + other_radius * math.cos(angle_rad)
-            edge_y = other.rect.centery + other_radius * math.sin(angle_rad)
+        # Vector from the agent to the target's center
+        to_other_center = pg.Vector2(other.rect.center) - pg.Vector2(self.rect.center)
+        if to_other_center.length() > self.sight_radius:
+            return False  # Skip if the center is out of sight
 
-            # Calculate the direction to the edge point from the agent
-            dx = edge_x - self.rect.centerx
-            dy = edge_y - self.rect.centery
-            distance = math.hypot(dx, dy)  # Euclidean distance between the centers
+        # Get the radius of the target (assuming circular or square shape)
+        radius = other.rect.width / 2  # Half the width of the rect is the "radius"
 
-            # Check if the distance is within the vision range
-            if distance <= self.sight_radius:
-                # Calculate the angle to the edge point
-                angle_to_edge = math.degrees(math.atan2(dy, dx))  # Angle in degrees
-                angle_to_edge = (angle_to_edge + 360) % 360  # Normalize angle to be between 0 and 360
+        # Define the edge points to check (e.g., top, bottom, left, right, diagonals)
+        edge_points = [
+            pg.Vector2(
+                other.rect.centerx + math.cos(math.radians(angle)) * radius,
+                other.rect.centery + math.sin(math.radians(angle)) * radius,
+            )
+            for angle in range(0, 360, 45)  # Adjust angle intervals for precision
+        ]
 
-                # Assuming self.direction is a pygame.math.Vector2
-                direction_angle = math.degrees(math.atan2(self.direction.y, self.direction.x))  # Calculate the angle from the vector
+        # Precompute normalized agent direction for efficiency
+        if self.direction.length() == 0:
+            return False  # If the direction vector has zero length, the agent can't "see"
+        self_dir = self.direction.normalize()
 
-                # Now calculate the left and right angles
-                left_angle = (direction_angle - vision_angle / 2) % 360
-                right_angle = (direction_angle + vision_angle / 2) % 360
-                if left_angle < right_angle:
-                    # If the cone doesn't wrap around 0°
-                    if left_angle <= angle_to_edge <= right_angle:
-                        return True
-                else:
-                    # If the cone wraps around 0°
-                    if angle_to_edge >= left_angle or angle_to_edge <= right_angle:
-                        return True
+        # Helper function for safe normalization
+        def safe_normalize(vector):
+            if vector.length() == 0:
+                return vector  # Return the zero vector as-is
+            return vector.normalize()
+
+        # Check each edge point
+        for edge_point in edge_points:
+            to_edge = edge_point - pg.Vector2(self.rect.center)
+            if to_edge.length() <= self.sight_radius:  # Within sight radius
+                # Safely normalize the vector to the edge point
+                to_edge_normalized = safe_normalize(to_edge)
+                # Calculate the cosine of the angle between the agent's direction and vector to edge
+                cos_angle = self_dir.dot(to_edge_normalized)
+                if cos_angle >= math.cos(math.radians(vision_angle / 2)):  # Within vision cone
+                    return True
+
         return False
+
 
 
 
@@ -648,7 +660,7 @@ class Agent(pg.sprite.Sprite):
                         screen.blit(self.font.render(f"######", True, c.WHITE), (self.rect.x, self.rect.y))
                         screen.blit(self.font.render(f"######", True, c.WHITE), (self.rect.x, self.rect.y))
 
-                        female.energy_level -= 20
+                        female.energy_level -= 50
                         female.can_reproduce = False  # Female needs to wait until aging to reproduce again
                         self.mating_state_timer=c.mating_state_timer_counter
                         if self.gender=="m":

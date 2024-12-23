@@ -3,11 +3,12 @@ import pygame as pg
 import numpy as np
 
 clock = pg.time.Clock()
-
+totalpop=75
+food_population=37
 
 # Screen dimensions
-screen_width = 300
-screen_height = 300
+screen_width = 400
+screen_height = 400
 
 # screen_width = 250
 # screen_height = 250
@@ -17,8 +18,8 @@ screen_height = 300
 fps = 2400
 life_timestep=5000
 loop_counter=0
-post_mating_state_timer_counter=4
-mating_state_timer_counter=4
+post_mating_state_timer_counter=2
+mating_state_timer_counter=2
 def update_loop_counter(x):
     global loop_counter
     loop_counter=x
@@ -44,7 +45,6 @@ age_increment_interval = 25  # seconds
 food_spawn_chance = 0.1  # Adjust the value as needed
 energy_decrease_interval = 15  # Decrease energy level every 5 seconds
 
-food_population=50
 genomeid=100
 
 geneCounter=0
