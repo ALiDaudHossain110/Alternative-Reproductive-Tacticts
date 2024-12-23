@@ -56,12 +56,12 @@ def envtime(clock_time):
     return sec,min,hour
     
 
-def createAgent( genome,time):
+def createAgent( genome,time,gen_no):
     initial_position = (random.randint(0, c.screen_width), random.randint(0, c.screen_height))
     # age = random.randint(5, 6)
     # age=1
     # gender = random.choice(["m", "f"])
-    generation_no = 1
+    generation_no = gen_no
     # energy_level = random.randint(10, 12)
     energy_level = 100
     body_size = 6 
@@ -91,9 +91,9 @@ def cloneAgent(agent):
     new_agent = Agent(new_pos, new_age, new_generation_no, new_energy_level, new_body_size,child_genome,time.time())
     return new_agent
 
-def inter_genome(genome,agent_group):
+def inter_genome(genome,agent_group,gen_no):
             
-    agent = createAgent(genome,time.time())
+    agent = createAgent(genome,time.time(),gen_no)
     agent.left_wheel_speed=0
     agent.right_wheel_speed=0
     c.dead_agent_bucket_list.append(agent)

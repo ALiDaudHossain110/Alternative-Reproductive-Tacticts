@@ -11,6 +11,7 @@ from infofunc import screen, prnt, prnt1,checkmouse, envtime, createAgent,agent_
 import numpy as np
 from genome import Genome
 from nn import NeuralNetwork
+import copy
 # Initialize pygame
 pg.init()
 
@@ -26,6 +27,7 @@ pg.display.set_caption("Alternative reproductive tactics (ARTs)")
 agent_group = pg.sprite.Group()
 food_group = pg.sprite.Group()
 agent_group2 = pg.sprite.Group()
+agent_group3 = pg.sprite.Group()
 
 pop_set_num=1
 
@@ -40,7 +42,7 @@ for _ in range(initial_food):
 initial_population = c.totalpop
 for _ in range(initial_population):
     gene=Genome()
-    inter_genome(gene,agent_group)
+    inter_genome(gene,agent_group,1)#1 is the gen_num(generation number)
  
 
 start_time = time.time()
@@ -146,6 +148,7 @@ while run:
     else:
         c.update_loop_counter(0)
 
+
         upload_gen_info()#uploading the genrationinfo
         c.pop_set_num +=1
         print("generation number:",  c.pop_set_num)
@@ -157,9 +160,11 @@ while run:
         c.clear_ge()
 
         print("size of children list:",agent_group2)
+
         # Randomly select agents from `agent_group2` until `agent_group` reaches 100 agents
         # if len(agent_group2)>120:
         totl=1.5*c.totalpop
+        fsttotl=0.2*c.totalpop
         if len(agent_group2)>totl:
             for new_agent in agent_group2:
                 if len(agent_group)<c.totalpop:
@@ -168,18 +173,40 @@ while run:
                         agent_group.add(new_agent)
                         c.dead_agent_bucket_list.append(new_agent)
                         c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
+        
+        #if less offsprings...
         else:
-            for new_agent in agent_group2:
-                if len(agent_group)<=c.totalpop:
-                    agent_group.add(new_agent)
-                    c.dead_agent_bucket_list.append(new_agent)
-                    c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
+            if len(agent_group2)==0:
+                # agent_group = pg.sprite.Group(copy.deepcopy(agent) for agent in agent_group3)
+                for agent in agent_group3:
+                    inter_genome(agent.genome,agent_group,agent.generation_no)
+
+
+            if len(agent_group2)<fsttotl and len(agent_group2)>0:
+                while len(agent_group) != fsttotl:
+                    for new_agent in agent_group2:
+                        if len(agent_group)<fsttotl:
+                            inter_genome(new_agent.genome,agent_group,new_agent.generation_no)
+                        else:
+                            break
+            else:
+
+                for new_agent in agent_group2:
+                    if len(agent_group)<=c.totalpop:
+                        agent_group.add(new_agent)
+                        c.dead_agent_bucket_list.append(new_agent)
+                        c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
 
         loop=c.totalpop-len(agent_group)
         if loop>0:
             for _ in range(loop):
                 gene=Genome() 
-                inter_genome(gene,agent_group)
+                inter_genome(gene,agent_group,1)#1 because new genome creation
+        agent_group3.empty()
+        # agent_group3 = pg.sprite.Group(copy.deepcopy(agent) for agent in agent_group)
+        #making a copy of the agents list going into the next generation, if the generation fails to make any offspring this will used to repopulate the next genso tht evolution is not lost.
+        for agent in agent_group:
+            agent_group3.add(createAgent(agent.genome,agent.birth_time,agent.generation_no))
         agent_group2.empty()
 
 
@@ -198,7 +225,7 @@ while run:
     population = len(agent_group)
     if population > 0:
         highest_generation = max(agent.generation_no for agent in agent_group)
-        font = pg.font.Font(None, 10)
+        font = pg.font.Font(None, 12)
         text = font.render(f"Population: {population} Highest Generation: {highest_generation}", True, c.WHITE)
     text2 = font.render(f"CLOCK : {hour} hr: {min} min: {sec} sec", True, c.WHITE)
     text4 = font.render(f"Population number: {c.pop_set_num}", True, c.WHITE)
