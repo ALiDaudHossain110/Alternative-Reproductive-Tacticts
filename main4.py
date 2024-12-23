@@ -7,7 +7,7 @@ import random
 import threading
 import time
 import matplotlib.pyplot as plt
-from infofunc import screen, prnt, checkmouse, envtime, createAgent,agent_fitness,inter_genome,best_fitness_genome,save_genomes,upload_gen_info,load_genomes,cloneAgent
+from infofunc import screen, prnt, prnt1,checkmouse, envtime, createAgent,agent_fitness,inter_genome,best_fitness_genome,save_genomes,upload_gen_info,load_genomes,cloneAgent
 import numpy as np
 from genome import Genome
 from nn import NeuralNetwork
@@ -99,7 +99,7 @@ while run:
                     if max_output_key == "output_0":
                         agent.state = 'moving_to_food'
                     if max_output_key == "output_1":
-                        agent.state = 'waiting'
+                        agent.state = 'Aproach_towards_nearest'
                     if max_output_key == "output_2": 
                         agent.state = 'mating as male'
                     if max_output_key == "output_3":
@@ -121,13 +121,13 @@ while run:
                             if third_best_key == "output_0":
                                 agent.state = 'moving_to_food'
                             if third_best_key == "output_1":
-                                agent.state = 'waiting'
+                                agent.state = 'Aproach_towards_nearest'
 
                         else:
                             if second_best_output == "output_0":
                                 agent.state = 'moving_to_food'
                             if second_best_output == "output_1":
-                                agent.state = 'waiting'
+                                agent.state = 'Aproach_towards_nearest'
 
 
                         c.update_agent_info(agent,output[5]) 
@@ -197,15 +197,15 @@ while run:
     population = len(agent_group)
     if population > 0:
         highest_generation = max(agent.generation_no for agent in agent_group)
-        font = pg.font.Font(None, 15)
+        font = pg.font.Font(None, 10)
         text = font.render(f"Population: {population} Highest Generation: {highest_generation}", True, c.WHITE)
     text2 = font.render(f"CLOCK : {hour} hr: {min} min: {sec} sec", True, c.WHITE)
     text4 = font.render(f"Population number: {c.pop_set_num}", True, c.WHITE)
     text3 = font.render(f"children length: {len(agent_group2)}", True, c.WHITE)
     text5 = font.render(f"No. of food: {len(food_group)}", True, c.WHITE)
-    prnt(text5, 0.7)
-    prnt(text3, 0.5)
-    prnt(text2, 0.8)
+    prnt1(text5, 0.7)
+    prnt1(text3, 0.3)
+    prnt1(text2, 0.01)
     prnt(text4, 0.3)
     prnt(text, 0.01)
 

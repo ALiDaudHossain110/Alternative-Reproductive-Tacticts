@@ -14,6 +14,10 @@ import numpy as np
 def prnt(text, percentage):
     screen.blit(text, (c.screen_width*percentage, 5))
 
+
+def prnt1(text, percentage):
+    screen.blit(text, (c.screen_width*percentage, 290))
+
 def checkmouse(agent_group):
         mouse_pos = pg.mouse.get_pos()
         # Check if mouse is hovering over any agent and display its energy level, age, and generation number

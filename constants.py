@@ -6,8 +6,8 @@ clock = pg.time.Clock()
 
 
 # Screen dimensions
-screen_width = 700
-screen_height = 700
+screen_width = 300
+screen_height = 300
 
 # screen_width = 250
 # screen_height = 250
@@ -44,7 +44,7 @@ age_increment_interval = 25  # seconds
 food_spawn_chance = 0.1  # Adjust the value as needed
 energy_decrease_interval = 15  # Decrease energy level every 5 seconds
 
-food_population=100
+food_population=50
 genomeid=100
 
 geneCounter=0

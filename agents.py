@@ -50,7 +50,7 @@ class Agent(pg.sprite.Sprite):
         self.direction = pg.Vector2(math.cos(math.radians(random_angle)), math.sin(math.radians(random_angle)))
         self.direction_to_move=pg.Vector2(math.cos(math.radians(random_angle)), math.sin(math.radians(random_angle)))
         self.speed = 2
-        self.sight_radius = 100
+        self.sight_radius = 50
         self.vision_angle = 180
         self.vision_angle_mating = 150
         self.can_reproduce=True
@@ -71,6 +71,7 @@ class Agent(pg.sprite.Sprite):
             "mating as male":[0]*550,
             "mating as female":[0]*550,
             "searching_for_food":[0]*550,
+            "Aproach_towards_nearest":[0]*550,
         }
 
     def state_stat(self):
@@ -165,10 +166,10 @@ class Agent(pg.sprite.Sprite):
 
         for food in food_group:
             if self.energy_level < 500:
-                # if self.check_edge_in_vision(food,self.vision_angle):
-                direction_to_food = pg.Vector2(food.rect.centerx - self.rect.centerx, food.rect.centery - self.rect.centery)
-                if direction_to_food.length() <= self.sight_radius:
-                        self.nearby_food.append(food)
+                if self.check_edge_in_vision(food,self.vision_angle):
+                    direction_to_food = pg.Vector2(food.rect.centerx - self.rect.centerx, food.rect.centery - self.rect.centery)
+                    if direction_to_food.length() <= self.sight_radius:
+                            self.nearby_food.append(food)
 
 
         # First, calculate the distances and store the agents with their distances in a temporary list
@@ -180,18 +181,18 @@ class Agent(pg.sprite.Sprite):
         for agent in agents:
             if agent is not self:
                 if self.age > 0 and self.energy_level > 3:
-                    # if self.check_edge_in_vision(food,self.vision_angle_mating):
+                    if self.check_edge_in_vision(agent,self.vision_angle_mating):
 
-                    direction_to_agent = pg.Vector2(agent.rect.centerx - self.rect.centerx, agent.rect.centery - self.rect.centery)
-                    if direction_to_agent.length() <= self.sight_radius:
-                            # Add the agent and its distance to a temporary list
-                            temp_nearby_agents.append((agent, direction_to_agent.length()))
-                            dist_to_front,dist_to_back=self.dist_face_back(agent)
-                            check_face=self.check_faceing_or_not(agent)
-                            if check_face:
-                                temp_nearby_agents_front.append((agent,dist_to_front))
-                            else:
-                                temp_nearby_agents_back.append((agent,dist_to_back))
+                        direction_to_agent = pg.Vector2(agent.rect.centerx - self.rect.centerx, agent.rect.centery - self.rect.centery)
+                        if direction_to_agent.length() <= self.sight_radius:
+                                # Add the agent and its distance to a temporary list
+                                temp_nearby_agents.append((agent, direction_to_agent.length()))
+                                dist_to_front,dist_to_back=self.dist_face_back(agent)
+                                check_face=self.check_faceing_or_not(agent)
+                                if check_face:
+                                    temp_nearby_agents_front.append((agent,dist_to_front))
+                                else:
+                                    temp_nearby_agents_back.append((agent,dist_to_back))
 
 
         # Sort the temporary list by the distance (ascending order)
@@ -342,22 +343,28 @@ class Agent(pg.sprite.Sprite):
         input[3] = self.energy_level/400  # Add normalized energy level
         input[4] = self.age/5000 #add age 
         return input
-    
+
+
+
     def act(self,agents,agent_group2):
-        if self.state == 'moving_to_food' and self.nearby_food:
-            self.move_to(self.nearby_food[0].rect.center,agents)
-        else:
 
-            self.state=='searching_for_food'
+        if self.state == 'moving_to_food':
+            if self.nearby_food:
+                self.move_to(self.nearby_food[0].rect.center,agents)
+            else:
+                self.state=='searching_for_food'
+                self.search_for_food(agents,self.nearby_food)
 
-        if self.state == 'waiting':
-            self.waiting()
 
-        if self.state == 'mating as male' and self.nearby_agents:
-            self.find_mate_as_male(agents,agent_group2)
+        if self.state == 'Aproach_towards_nearest':
+            self.aproaching(agents)
+        
 
-        else:
-            self.waiting()
+        if self.state == 'mating as male':
+            if self.nearby_agents:
+                self.find_mate_as_male(agents,agent_group2)
+            else:
+                self.waiting()
 
         if self.state == 'mating as female'and self.nearby_agents:
             self.find_mate_as_female(agents,agent_group2)
@@ -399,6 +406,16 @@ class Agent(pg.sprite.Sprite):
         self.rect = self.image.get_rect()  # Get the rect for the image
         self.rect.center = pos  # Set the rect’s center to the agent’s position
 
+
+    def aproaching(self,agents):
+        if self.nearby_agents:
+            agent=self.nearby_agents[0]
+            self.move_to(agent.rect.center,agents)
+        else:
+            self.state='waiting'
+            self.wander()
+
+
     def move_to(self, target,agents):
 
         self.check_Collision(agents)
@@ -423,10 +440,6 @@ class Agent(pg.sprite.Sprite):
         self.left_wheel_speed = self.speed - rotation_speed
         self.right_wheel_speed = self.speed + rotation_speed
 
-        # Ensure wheel speeds are within acceptable limits
-        # max_wheel_speed = self.speed
-        # self.left_wheel_speed =int( max(-max_wheel_speed, min(self.left_wheel_speed, max_wheel_speed)))
-        # self.right_wheel_speed = int(max(-max_wheel_speed, min(self.right_wheel_speed, max_wheel_speed)))
         self.clamp_speed()
         # self.check_Collision()        
         self.update_position(agents)
@@ -441,7 +454,7 @@ class Agent(pg.sprite.Sprite):
         if rotation != 0:
             angle = rotation * 180 / math.pi
             self.direction.rotate_ip(angle)  # Adjusted sign for correct rotation direction
-    # Normalize direction
+        # Normalize direction
         if self.direction.length() > 0:
             self.direction = self.direction.normalize()
         else:
@@ -529,8 +542,9 @@ class Agent(pg.sprite.Sprite):
 
     def interact(self, agents,agent_group2):
         if self.state == 'mating as female' or self.state == 'mating as male':
-            for agent in agents:
-                if agent is not self and self.rect.colliderect(agent.rect):
+            for agent in self.nearby_agents:
+                distance = math.sqrt((self.rect.centerx - agent.rect.centerx) ** 2 + (self.rect.centery - agent.rect.centery) ** 2)
+                if agent is not self and distance<18:#6 bodysize +6 body size of othe +5 mating zone
                     if self.gender != agent.gender:
                         self.mate(agent,agents,agent_group2)
 
@@ -539,17 +553,22 @@ class Agent(pg.sprite.Sprite):
         self.appearance(self.gender,self.body_size,self.rect.center)
 
         if self.nearby_agents:
-            if self.nearby_agents_face_dist and self.nearby_agents_back_dist:
-                if self.nearby_agents_face_dist[0]<self.nearby_agents_back_dist[0]:
-                    agent= self.nearby_agents_face[0]
-                    if agent is not self and agent.gender != self.gender:
-                        self.move_to(agent.rect.center,agents)
-                        self.interact(agents,agent_group2)
-                else:
-                    agent= self.nearby_agents_back[0]
-                    if agent is not self and agent.gender != self.gender:
-                        self.move_to(agent.rect.center,agents)
-                        self.interact(agents,agent_group2) 
+                self.interact(agents,agent_group2)
+        else:
+            return
+                    
+        # if self.nearby_agents:
+        #     if self.nearby_agents_face_dist and self.nearby_agents_back_dist:
+        #         if self.nearby_agents_face_dist[0]<self.nearby_agents_back_dist[0]:
+        #             agent= self.nearby_agents_face[0]
+        #             if agent is not self and agent.gender != self.gender:
+        #                 # self.move_to(agent.rect.center,agents)
+        #                 self.interact(agents,agent_group2)
+        #         else:
+        #             agent= self.nearby_agents_back[0]
+        #             if agent is not self and agent.gender != self.gender:
+        #                 # self.move_to(agent.rect.center,agents)
+        #                 self.interact(agents,agent_group2) 
 
     def find_mate_as_female(self,agents,agent_group2):
 
@@ -558,17 +577,8 @@ class Agent(pg.sprite.Sprite):
 
 
         if self.nearby_agents:
-            if self.nearby_agents_face_dist and self.nearby_agents_back_dist:
-                if self.nearby_agents_face_dist[0]<self.nearby_agents_back_dist[0]:
-                    agent= self.nearby_agents_face[0]
-                    if agent is not self and agent.gender != self.gender:
-                        self.move_to(agent.rect.center,agents)
                         self.interact(agents,agent_group2)
-                else:
-                    agent= self.nearby_agents_back[0]
-                    if agent is not self and agent.gender != self.gender:
-                        self.move_to(agent.rect.center,agents)
-                        self.interact(agents,agent_group2) 
+
 
     def mate(self, other,agents,agent_group2):
         # print("reproduced 1st line")
@@ -634,6 +644,9 @@ class Agent(pg.sprite.Sprite):
                             # c.ge2.append(child_genome)
                             # print("reproduced")
                                 c.genome_id.append(c.genomeid)                                
+                        screen.blit(self.font.render(f"######", True, c.WHITE), (self.rect.x, self.rect.y))
+                        screen.blit(self.font.render(f"######", True, c.WHITE), (self.rect.x, self.rect.y))
+                        screen.blit(self.font.render(f"######", True, c.WHITE), (self.rect.x, self.rect.y))
 
                         female.energy_level -= 20
                         female.can_reproduce = False  # Female needs to wait until aging to reproduce again
