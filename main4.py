@@ -163,9 +163,9 @@ while run:
 
         # Randomly select agents from `agent_group2` until `agent_group` reaches 100 agents
         # if len(agent_group2)>120:
-        totl=1.5*c.totalpop
+        totl=c.totalpop
         fsttotl=0.5*c.totalpop
-        if len(agent_group2)>totl:
+        if len(agent_group2)>=totl:
             for new_agent in agent_group2:
                 if len(agent_group)<c.totalpop:
                     choice=random.choice(["y","n"])
@@ -183,11 +183,11 @@ while run:
                 # agent_group = pg.sprite.Group(copy.deepcopy(agent) for agent in agent_group3)
                 for agent in agent_group3:
                     # print("1,,")
+                    if len(agent_group)<fsttotl:
+                        inter_genome(agent.genome,agent_group,agent.generation_no)
 
-                    inter_genome(agent.genome,agent_group,agent.generation_no)
 
-
-            if len(agent_group2)<fsttotl and len(agent_group2)>0:
+            if len(agent_group2)<totl and len(agent_group2)>0:
                 # print("2")
 
                 while len(agent_group) < fsttotl:
@@ -201,13 +201,13 @@ while run:
                             # print("length",len(agent_group))
                             break
                     
-            else:
+            # else:
 
-                for new_agent in agent_group2:
-                    if len(agent_group)<=c.totalpop:
-                        agent_group.add(new_agent)
-                        c.dead_agent_bucket_list.append(new_agent)
-                        c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
+            #     for new_agent in agent_group2:
+            #         if len(agent_group)<=c.totalpop:
+            #             agent_group.add(new_agent)
+            #             c.dead_agent_bucket_list.append(new_agent)
+            #             c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
 
         loop=c.totalpop-len(agent_group)
         if loop>0:

@@ -3,8 +3,8 @@ import pygame as pg
 import numpy as np
 
 clock = pg.time.Clock()
-totalpop=75
-food_population=37
+totalpop=100
+food_population=70
 
 # Screen dimensions
 screen_width = 400

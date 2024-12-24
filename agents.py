@@ -630,11 +630,11 @@ class Agent(pg.sprite.Sprite):
                         # print("reproduced 5th line")
 
                         num_children = 2 
-                        self.reproductive_success=self.reproductive_success+2
                        
                         if self.gender=="f":
                             # print("reproduced 6th line")
-                        
+                            self.reproductive_success=self.reproductive_success+2
+
                             self.no_of_matings_as_female=self.no_of_matings_as_female+2
                             male.no_of_matings_as_male=self.no_of_matings_as_male+2
                             for i in range(num_children):
