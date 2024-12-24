@@ -132,7 +132,7 @@ while run:
                                 agent.state = 'Aproach_towards_nearest'
 
 
-                        c.update_agent_info(agent,output[5]) 
+                        # c.update_agent_info(agent,output[5]) 
 
             
             if agent.mating_state_timer<4:#checks if in mating state.
@@ -164,7 +164,7 @@ while run:
         # Randomly select agents from `agent_group2` until `agent_group` reaches 100 agents
         # if len(agent_group2)>120:
         totl=1.5*c.totalpop
-        fsttotl=0.2*c.totalpop
+        fsttotl=0.5*c.totalpop
         if len(agent_group2)>totl:
             for new_agent in agent_group2:
                 if len(agent_group)<c.totalpop:
@@ -176,19 +176,31 @@ while run:
         
         #if less offsprings...
         else:
+            # print("1")
             if len(agent_group2)==0:
+                # print("2")
+
                 # agent_group = pg.sprite.Group(copy.deepcopy(agent) for agent in agent_group3)
                 for agent in agent_group3:
+                    # print("1,,")
+
                     inter_genome(agent.genome,agent_group,agent.generation_no)
 
 
             if len(agent_group2)<fsttotl and len(agent_group2)>0:
-                while len(agent_group) != fsttotl:
+                # print("2")
+
+                while len(agent_group) < fsttotl:
+                    # print("111")
+
                     for new_agent in agent_group2:
                         if len(agent_group)<fsttotl:
+                            # print("add")
                             inter_genome(new_agent.genome,agent_group,new_agent.generation_no)
                         else:
+                            # print("length",len(agent_group))
                             break
+                    
             else:
 
                 for new_agent in agent_group2:

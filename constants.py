@@ -18,7 +18,7 @@ screen_height = 400
 fps = 2400
 life_timestep=5000
 loop_counter=0
-post_mating_state_timer_counter=2
+post_mating_state_timer_counter=4
 mating_state_timer_counter=2
 def update_loop_counter(x):
     global loop_counter

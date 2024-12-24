@@ -104,11 +104,18 @@ class Agent(pg.sprite.Sprite):
 
 
         if self.post_mating_state_timer <c.post_mating_state_timer_counter:
-            if self.post_mating_state_timer>0:
-                self.post_mating_state_timer-=1
-            if self.post_mating_state_timer==0:
+            if self.post_mating_state_timer > 0:
+                self.post_mating_state_timer -= 1
+                # print("self.post_mating_state_timer",self.post_mating_state_timer)
+                # print("deducted")
+            elif self.post_mating_state_timer == 0:
+                # print("self.post_mating_state_timer",self.post_mating_state_timer)
+                # print("value set")
                 self.post_mating_state_timer=c.post_mating_state_timer_counter
                 self.can_reproduce = True  # Allow reproduction again after aging
+
+
+                # Do not reset the timer here. It should be reset after mating.
 
         self.update_position(agents)
 
@@ -163,8 +170,6 @@ class Agent(pg.sprite.Sprite):
                     return True
 
         return False
-
-
 
 
     def perceive(self, agents, food_group):
@@ -356,11 +361,10 @@ class Agent(pg.sprite.Sprite):
         input[4] = self.age/5000 #add age 
         return input
 
-
-
     def act(self,agents,agent_group2):
 
         if self.state == 'moving_to_food':
+            self.mating_state_timer=c.mating_state_timer_counter
             if self.nearby_food:
                 self.move_to(self.nearby_food[0].rect.center,agents)
             else:
@@ -369,6 +373,7 @@ class Agent(pg.sprite.Sprite):
 
 
         if self.state == 'Aproach_towards_nearest':
+            self.mating_state_timer=c.mating_state_timer_counter
             self.aproaching(agents)
         
 
@@ -418,7 +423,6 @@ class Agent(pg.sprite.Sprite):
         self.rect = self.image.get_rect()  # Get the rect for the image
         self.rect.center = pos  # Set the rect’s center to the agent’s position
 
-
     def aproaching(self,agents):
         if self.nearby_agents:
             agent=self.nearby_agents[0]
@@ -426,7 +430,6 @@ class Agent(pg.sprite.Sprite):
         else:
             self.state='waiting'
             self.wander()
-
 
     def move_to(self, target,agents):
 
@@ -601,87 +604,98 @@ class Agent(pg.sprite.Sprite):
 
             male_genome = male.genome    # Get the genome of the male agent
             female_genome = female.genome # Get the genome of the female agent
+            # print("==================================")
+            # print("male.post_mating_state_timer",male.post_mating_state_timer)
+            # print("male.post_mating_state_timer",male.post_mating_state_timer)
+            # print("==================================")
 
             # print("reproduced 2nd line")
             prob_of_female_mating=female.energy_level/500
             random_num=random.random()
+            # print("prob_of_female_mating",prob_of_female_mating)
+            # print("random_num",random_num)
+            # print("----------------------")
             if random_num<prob_of_female_mating:
                 # print("reproduced 3rd line")
 
                 # if male.age > 0 and female.age > 0 and female.can_reproduce and male.state == 'mating as male' and female.state == 'mating as female':
-                if male.age > 0 and female.age > 0 and female.can_reproduce and male.state == 'mating as male' and female.state == 'mating as female':
+                if female.can_reproduce and male.state == 'mating as male' and female.state == 'mating as female':
                     # print("reproduced 4th line")
+                    # print("female.mating_state_timer",female.mating_state_timer)
+                    # print("female.post_mating_state_timer",female.post_mating_state_timer)
+                    # print("male.mating_state_timer",male.mating_state_timer)
+                    # print("male.post_mating_state_timer",male.post_mating_state_timer)
 
                     if female.mating_state_timer==0 and female.post_mating_state_timer==c.post_mating_state_timer_counter and male.mating_state_timer==0 and male.post_mating_state_timer==c.post_mating_state_timer_counter:
+                        # print("reproduced 5th line")
 
                         num_children = 2 
                         self.reproductive_success=self.reproductive_success+2
-
-                        if self.gender=="m":                        
-                            self.no_of_matings_as_male=self.no_of_matings_as_male+2
-                        
-                        if self.gender=="f":                        
-                            self.no_of_matings_as_female=self.no_of_matings_as_female+2
-
-                        for i in range(num_children):
-                            
-                            child_genome1=Genome()
-                            child_genome2=Genome()
-                            if i==0:
-                                child_genome1.gene=child_genome1.reproduce(child_genome1.gene, male_genome.gene, female_genome.gene,"m")
-                            if i==1:
-                                child_genome2.gene=child_genome2.reproduce(child_genome2.gene, male_genome.gene, female_genome.gene,"f")
-
-                            c.female_parent.append(female_genome)
-                            c.male_parent.append(male_genome)
-
-                            new_pos_x = (self.rect.x + other.rect.x) // 2
-                            new_pos_y = (self.rect.y + other.rect.y) // 2
-                            new_pos = (new_pos_x, new_pos_y)
-
-                            new_generation_no = max(self.generation_no, other.generation_no) + 1
-                            new_energy_level =  100
-                            new_body_size = 6 
-                            if i==0:
-                                new_agent = Agent(new_pos, new_generation_no, new_energy_level, new_body_size,child_genome1,time.time())
-                                agent_group2.add(new_agent)
-                                c.agents2.append(new_agent)
-                            # c.ge2.append(child_genome)
-                            # print("reproduced")
-                                c.genome_id.append(c.genomeid)
-                            if i==1:
-                                new_agent = Agent(new_pos, new_generation_no, new_energy_level, new_body_size,child_genome2,time.time())
-                                agent_group2.add(new_agent)
-                                c.agents2.append(new_agent)
-                            # c.ge2.append(child_genome)
-                            # print("reproduced")
-                                c.genome_id.append(c.genomeid)                                
-                        screen.blit(self.font.render(f"######", True, c.WHITE), (self.rect.x, self.rect.y))
-                        screen.blit(self.font.render(f"######", True, c.WHITE), (self.rect.x, self.rect.y))
-                        screen.blit(self.font.render(f"######", True, c.WHITE), (self.rect.x, self.rect.y))
-
-                        female.energy_level -= 50
-                        female.can_reproduce = False  # Female needs to wait until aging to reproduce again
-                        self.mating_state_timer=c.mating_state_timer_counter
-                        if self.gender=="m":
-                            self.post_mating_state_timer-=2
+                       
                         if self.gender=="f":
-                            self.post_mating_state_timer-=1
+                            # print("reproduced 6th line")
+                        
+                            self.no_of_matings_as_female=self.no_of_matings_as_female+2
+                            male.no_of_matings_as_male=self.no_of_matings_as_male+2
+                            for i in range(num_children):
+                                # print("prob_of_female_mating-success",prob_of_female_mating)
+                                # print("random_num-success",random_num)
+                                # print("++++++++++++++++")
+                                child_genome1=Genome()
+                                child_genome2=Genome()
+                                if i==0:
+                                    child_genome1.gene=child_genome1.reproduce(child_genome1.gene, male_genome.gene, female_genome.gene,"m")
+                                if i==1:
+                                    child_genome2.gene=child_genome2.reproduce(child_genome2.gene, male_genome.gene, female_genome.gene,"f")
 
-                        male.state = 'waiting'
-                        female.state = 'waiting'
-                        male.nearby_agents.clear()
-                        female.nearby_agents.clear()
-                        male.direction.x = random.choice([-1, 1]) * abs(male.direction.x)
-                        male.direction.y = random.choice([-1, 1]) * abs(male.direction.y)
-                        female.direction.x = random.choice([-1, 1]) * abs(female.direction.x)
-                        female.direction.y = random.choice([-1, 1]) * abs(female.direction.y)
-                        self.act(agents,agent_group2)
-                    
-                    # screen.blit(self.font.render(f"....", True, c.WHITE), (self.rect.x, self.rect.y))
-                    # screen.blit(self.font.render(f"........", True, c.WHITE), (self.rect.x, self.rect.y))
+                                c.female_parent.append(female_genome)
+                                c.male_parent.append(male_genome)
 
-                    self.mating_state_timer-=1
+                                new_pos_x = (self.rect.x + other.rect.x) // 2
+                                new_pos_y = (self.rect.y + other.rect.y) // 2
+                                new_pos = (new_pos_x, new_pos_y)
+
+                                new_generation_no = max(self.generation_no, other.generation_no) + 1
+                                new_energy_level =  100
+                                new_body_size = 6 
+                                if i==0:
+                                    new_agent = Agent(new_pos, new_generation_no, new_energy_level, new_body_size,child_genome1,time.time())
+                                    agent_group2.add(new_agent)
+                                    c.agents2.append(new_agent)
+                                # c.ge2.append(child_genome)
+                                # print("reproduced")
+                                    c.genome_id.append(c.genomeid)
+                                if i==1:
+                                    new_agent = Agent(new_pos, new_generation_no, new_energy_level, new_body_size,child_genome2,time.time())
+                                    agent_group2.add(new_agent)
+                                    c.agents2.append(new_agent)
+                                # c.ge2.append(child_genome)
+                                # print("reproduced")
+                                    c.genome_id.append(c.genomeid)                                
+
+                            female.energy_level -= 50
+                            female.can_reproduce = False  # Female needs to wait until aging to reproduce again
+                            male.post_mating_state_timer-=2
+                            female.post_mating_state_timer-=1
+
+                            male.state = 'waiting'
+                            female.state = 'waiting'
+                            male.nearby_agents.clear()
+                            female.nearby_agents.clear()
+                            male.direction.x = random.choice([-1, 1]) * abs(male.direction.x)
+                            male.direction.y = random.choice([-1, 1]) * abs(male.direction.y)
+                            female.direction.x = random.choice([-1, 1]) * abs(female.direction.x)
+                            female.direction.y = random.choice([-1, 1]) * abs(female.direction.y)
+                            self.act(agents,agent_group2)
+                        
+                        # screen.blit(self.font.render(f"....", True, c.WHITE), (self.rect.x, self.rect.y))
+                        # screen.blit(self.font.render(f"........", True, c.WHITE), (self.rect.x, self.rect.y))
+                    # print("female.post_mating_state_timer",female.post_mating_state_timer)
+                    # print("male.post_mating_state_timer",male.post_mating_state_timer)
+                    if self.mating_state_timer<=0:
+                        self.mating_state_timer=c.mating_state_timer_counter
+                    else:
+                        self.mating_state_timer-=1
 
 
     def eat(self, food_group):
@@ -798,7 +812,7 @@ class Agent(pg.sprite.Sprite):
         # self.age += 1
         self.appearance(self.gender,self.body_size,self.rect.center)
 
-        if self.age > 5000:
+        if self.age > 4750:
             self.kill()
    
     def calculate_movement_direction(self):

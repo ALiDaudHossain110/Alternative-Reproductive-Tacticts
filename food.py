@@ -6,7 +6,7 @@ import random
 class Food(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.energy = 20  # Random energy level for the food
+        self.energy = 50  # Random energy level for the food
         self.radius = 2  # Random radius for the food
         self.color = constants.GREEN
         self.rect = pg.Rect(random.randint(0, constants.screen_width - self.radius),
