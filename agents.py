@@ -50,7 +50,7 @@ class Agent(pg.sprite.Sprite):
         self.direction = pg.Vector2(math.cos(math.radians(random_angle)), math.sin(math.radians(random_angle)))
         self.direction_to_move=pg.Vector2(math.cos(math.radians(random_angle)), math.sin(math.radians(random_angle)))
         self.speed = 2
-        self.sight_radius = 50
+        self.sight_radius = 100
         self.vision_angle = 180
         self.vision_angle_mating = 150
         self.can_reproduce=True
@@ -144,7 +144,7 @@ class Agent(pg.sprite.Sprite):
                 other.rect.centerx + math.cos(math.radians(angle)) * radius,
                 other.rect.centery + math.sin(math.radians(angle)) * radius,
             )
-            for angle in range(0, 360, 45)  # Adjust angle intervals for precision
+            for angle in range(0, 360, 90)  # Adjust angle intervals for precision
         ]
 
         # Precompute normalized agent direction for efficiency
@@ -183,10 +183,10 @@ class Agent(pg.sprite.Sprite):
 
         for food in food_group:
             if self.energy_level < 500:
-                if self.check_edge_in_vision(food,self.vision_angle):
-                    direction_to_food = pg.Vector2(food.rect.centerx - self.rect.centerx, food.rect.centery - self.rect.centery)
-                    if direction_to_food.length() <= self.sight_radius:
-                            self.nearby_food.append(food)
+                # if self.check_edge_in_vision(food,self.vision_angle):
+                direction_to_food = pg.Vector2(food.rect.centerx - self.rect.centerx, food.rect.centery - self.rect.centery)
+                if direction_to_food.length() <= self.sight_radius:
+                        self.nearby_food.append(food)
 
 
         # First, calculate the distances and store the agents with their distances in a temporary list
@@ -198,18 +198,18 @@ class Agent(pg.sprite.Sprite):
         for agent in agents:
             if agent is not self:
                 if self.age > 0 and self.energy_level > 3:
-                    if self.check_edge_in_vision(agent,self.vision_angle_mating):
+                    # if self.check_edge_in_vision(agent,self.vision_angle_mating):
 
-                        direction_to_agent = pg.Vector2(agent.rect.centerx - self.rect.centerx, agent.rect.centery - self.rect.centery)
-                        if direction_to_agent.length() <= self.sight_radius:
-                                # Add the agent and its distance to a temporary list
-                                temp_nearby_agents.append((agent, direction_to_agent.length()))
-                                dist_to_front,dist_to_back=self.dist_face_back(agent)
-                                check_face=self.check_faceing_or_not(agent)
-                                if check_face:
-                                    temp_nearby_agents_front.append((agent,dist_to_front))
-                                else:
-                                    temp_nearby_agents_back.append((agent,dist_to_back))
+                    direction_to_agent = pg.Vector2(agent.rect.centerx - self.rect.centerx, agent.rect.centery - self.rect.centery)
+                    if direction_to_agent.length() <= self.sight_radius:
+                            # Add the agent and its distance to a temporary list
+                            temp_nearby_agents.append((agent, direction_to_agent.length()))
+                            dist_to_front,dist_to_back=self.dist_face_back(agent)
+                            check_face=self.check_faceing_or_not(agent)
+                            if check_face:
+                                temp_nearby_agents_front.append((agent,dist_to_front))
+                            else:
+                                temp_nearby_agents_back.append((agent,dist_to_back))
 
 
         # Sort the temporary list by the distance (ascending order)

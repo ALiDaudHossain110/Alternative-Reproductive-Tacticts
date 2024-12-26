@@ -19,7 +19,7 @@ pg.init()
 clock = pg.time.Clock()
 
 # Create game window
-screen = pg.display.set_mode((c.screen_width, c.screen_height))
+screen = pg.display.set_mode((c.screen_width+100, c.screen_height+100))
 pg.display.set_caption("Alternative reproductive tactics (ARTs)")
 
 
@@ -239,12 +239,12 @@ while run:
         highest_generation = max(agent.generation_no for agent in agent_group)
         font = pg.font.Font(None, 12)
         text = font.render(f"Population: {population} Highest Generation: {highest_generation}", True, c.WHITE)
-    text2 = font.render(f"CLOCK : {hour} hr: {min} min: {sec} sec", True, c.WHITE)
+    text2 = font.render(f": {hour} hr: {min} min: {sec} sec", True, c.WHITE)
     text4 = font.render(f"Population number: {c.pop_set_num}", True, c.WHITE)
     text3 = font.render(f"children length: {len(agent_group2)}", True, c.WHITE)
     text5 = font.render(f"No. of food: {len(food_group)}", True, c.WHITE)
-    prnt1(text5, 0.7)
-    prnt1(text3, 0.3)
+    # prnt1(text5, 0.7)
+    prnt1(text3, 0.5)
     prnt1(text2, 0.01)
     prnt(text4, 0.6)
     prnt(text, 0.01)

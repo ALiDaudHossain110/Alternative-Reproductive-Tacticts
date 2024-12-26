@@ -4,7 +4,7 @@ import numpy as np
 
 clock = pg.time.Clock()
 totalpop=100
-food_population=70
+food_population=50
 
 # Screen dimensions
 screen_width = 400
