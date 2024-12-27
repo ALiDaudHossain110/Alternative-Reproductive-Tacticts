@@ -58,7 +58,7 @@ class Genome():
                         mutation = np.random.normal(0, standard_deviation)  # Gaussian mutation
                         offspring_gene[i][j] += mutation  # Apply mutation
                         # Ensure the mutated value is within bounds (e.g., 0 to 1)
-                        offspring_gene[i][j] = np.clip(offspring_gene[i][j], 0, 1)
+                        # offspring_gene[i][j] = np.clip(offspring_gene[i][j], -1, 1)
             print("Mutation has been done on child")
 
         return offspring_gene

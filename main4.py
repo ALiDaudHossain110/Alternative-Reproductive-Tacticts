@@ -187,7 +187,7 @@ while run:
                         inter_genome(agent.genome,agent_group,agent.generation_no)
 
 
-            if len(agent_group2)<totl and len(agent_group2)>0:
+            if len(agent_group2)<=fsttotl and len(agent_group2)>0:
                 # print("2")
 
                 while len(agent_group) < fsttotl:
@@ -200,7 +200,20 @@ while run:
                         else:
                             # print("length",len(agent_group))
                             break
-                    
+
+            if len(agent_group2)>=fsttotl and len(agent_group2)<totl and len(agent_group2)>0:
+                # print("2")
+
+                    # print("111")
+
+                for new_agent in agent_group2:
+                    if len(agent_group)<totl:
+                        # print("add")
+                        inter_genome(new_agent.genome,agent_group,new_agent.generation_no)
+                    else:
+                        # print("length",len(agent_group))
+                        break
+
             # else:
 
             #     for new_agent in agent_group2:

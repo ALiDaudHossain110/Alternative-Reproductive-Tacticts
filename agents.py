@@ -646,7 +646,7 @@ class Agent(pg.sprite.Sprite):
                                 if i==0:
                                     child_genome1.gene=child_genome1.reproduce(child_genome1.gene, male_genome.gene, female_genome.gene,"m")
                                 if i==1:
-                                    child_genome2.gene=child_genome2.reproduce(child_genome2.gene, male_genome.gene, female_genome.gene,"f")
+                                    child_genome2.gene=child_genome2.reproduce(child_genome2.gene,female_genome.gene, male_genome.gene, "f")
 
                                 c.female_parent.append(female_genome)
                                 c.male_parent.append(male_genome)
