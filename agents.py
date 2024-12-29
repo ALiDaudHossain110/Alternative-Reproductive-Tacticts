@@ -92,7 +92,7 @@ class Agent(pg.sprite.Sprite):
         self.age=c.loop_counter
         if c.loop_counter%5==0 and c.loop_counter>self.old_timestep:
             
-            self.energy_level -= 2
+            self.energy_level -= 1
             self.old_timestep = c.loop_counter
 
 
@@ -182,7 +182,7 @@ class Agent(pg.sprite.Sprite):
         self.nearby_agents_face=[]
 
         for food in food_group:
-            if self.energy_level < 500:
+            if self.energy_level < c.max_energy:
                 # if self.check_edge_in_vision(food,self.vision_angle):
                 direction_to_food = pg.Vector2(food.rect.centerx - self.rect.centerx, food.rect.centery - self.rect.centery)
                 if direction_to_food.length() <= self.sight_radius:
@@ -357,7 +357,7 @@ class Agent(pg.sprite.Sprite):
         input[0] = dist_to_food  # Add this distance to the food to the input list      
         input[1] = dist_to_other_face  # Add this distance to the dist_to_other_face to the input list    
         input[2] = dist_to_other_back  # Add this distance to the dist_to_other_back to the input list          
-        input[3] = self.energy_level/400  # Add normalized energy level
+        input[3] = self.energy_level/c.max_energy  # Add normalized energy level
         input[4] = self.age/5000 #add age 
         return input
 
@@ -610,7 +610,7 @@ class Agent(pg.sprite.Sprite):
             # print("==================================")
 
             # print("reproduced 2nd line")
-            prob_of_female_mating=female.energy_level/500
+            prob_of_female_mating=female.energy_level/c.max_energy
             random_num=random.random()
             # print("prob_of_female_mating",prob_of_female_mating)
             # print("random_num",random_num)
@@ -650,10 +650,10 @@ class Agent(pg.sprite.Sprite):
 
                                 c.female_parent.append(female_genome)
                                 c.male_parent.append(male_genome)
+                                
 
-                                new_pos_x = (self.rect.x + other.rect.x) // 2
-                                new_pos_y = (self.rect.y + other.rect.y) // 2
-                                new_pos = (new_pos_x, new_pos_y)
+                                new_pos = (random.randint(0, c.screen_width), random.randint(0, c.screen_height))
+
 
                                 new_generation_no = max(self.generation_no, other.generation_no) + 1
                                 new_energy_level =  100
@@ -673,7 +673,7 @@ class Agent(pg.sprite.Sprite):
                                 # print("reproduced")
                                     c.genome_id.append(c.genomeid)                                
 
-                            female.energy_level -= 50
+                            female.energy_level -= 8
                             female.can_reproduce = False  # Female needs to wait until aging to reproduce again
                             male.post_mating_state_timer-=2
                             female.post_mating_state_timer-=1
@@ -701,7 +701,7 @@ class Agent(pg.sprite.Sprite):
     def eat(self, food_group):
         collided_food = pg.sprite.spritecollideany(self, food_group)
         if collided_food:
-            if self.energy_level < 450:
+            if self.energy_level < c.max_energy:
                 self.energy_level += collided_food.energy
 
             collided_food.kill()

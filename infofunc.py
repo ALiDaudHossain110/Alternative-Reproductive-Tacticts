@@ -57,6 +57,9 @@ def envtime(clock_time):
     
 
 def createAgent( genome,time,gen_no):
+    # print("--------------------------")
+    # print(genome)
+
     initial_position = (random.randint(0, c.screen_width), random.randint(0, c.screen_height))
     # age = random.randint(5, 6)
     # age=1
@@ -92,7 +95,7 @@ def cloneAgent(agent):
     return new_agent
 
 def inter_genome(genome,agent_group,gen_no):
-            
+    # print("--------------------------")
     agent = createAgent(genome,time.time(),gen_no)
     agent.left_wheel_speed=0
     agent.right_wheel_speed=0

@@ -12,6 +12,8 @@ import numpy as np
 from genome import Genome
 from nn import NeuralNetwork
 import copy
+from retrivegenome import retrivegenome, retriveselectedgenome
+
 # Initialize pygame
 pg.init()
 
@@ -38,11 +40,17 @@ for _ in range(initial_food):
     food = Food()
     food_group.add(food)
 
-# Initial agent population
-initial_population = c.totalpop
-for _ in range(initial_population):
-    gene=Genome()
-    inter_genome(gene,agent_group,1)#1 is the gen_num(generation number)
+initialization="start"
+if initialization=="retrive":
+    retrivegenome("dead_agents_info_todayfinalpart2.pkl",agent_group)
+elif initialization=="retriveselectedgenome":
+    retriveselectedgenome("dead_agents_info_todayfinalpart2.pkl",agent_group,114)
+elif initialization=="start":
+    # Initial agent population
+    initial_population = c.totalpop
+    for _ in range(initial_population):
+        gene=Genome()
+        inter_genome(gene,agent_group,1)#1 is the gen_num(generation number)
  
 
 start_time = time.time()

@@ -7,9 +7,11 @@ totalpop=100
 food_population=100
 
 # Screen dimensions
-screen_width = 400
-screen_height = 400
+screen_width = 500
+screen_height = 500
 
+
+max_energy=300
 # screen_width = 250
 # screen_height = 250
 
