@@ -28,6 +28,8 @@ def checkmouse(agent_group):
                 hover_text = f"Energy: {agent.energy_level} Age: {agent.age} Generation: {agent.generation_no}"
                 text_surface = font.render(hover_text, True, c.WHITE)
                 hover_text2 = agent.calculate_movement_direction()
+                # print("hover_text2",hover_text2)
+                # print("state",agent.state)
                 text_surface2 = font.render(hover_text2, True, c.WHITE)
                 hover_text3 = agent.state
                 text_surface3 = font.render(hover_text3, True, c.WHITE)

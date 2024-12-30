@@ -114,6 +114,8 @@ class Agent(pg.sprite.Sprite):
                 self.post_mating_state_timer=c.post_mating_state_timer_counter
                 self.can_reproduce = True  # Allow reproduction again after aging
 
+        self.left_wheel_speed = self.left_wheel_speed
+        self.right_wheel_speed = self.right_wheel_speed
 
                 # Do not reset the timer here. It should be reset after mating.
 
@@ -235,7 +237,8 @@ class Agent(pg.sprite.Sprite):
         if agent.direction.length()>0:
             agent.direction = agent.direction.normalize()  # Normalize Agent 2's direction vector
         else:
-            agent.direction = pg.Vector2(1, 0)  # Default to moving right
+            agent.direction = pg.Vector2(1,0).normalize()  # Default to moving right
+
         # Calculate the dot product between Agent 2's direction and the vector to Agent 1
         dot_product = agent.direction.dot(vector_to_agent)
         dot_product = max(min(dot_product, 1.0), -1.0)  # Clamp to avoid numerical errors
@@ -246,9 +249,6 @@ class Agent(pg.sprite.Sprite):
         # Check if the angle is within the threshold (Agent 1 is looking at Agent 2's face)
         return angle <= self.vision_angle_mating/2
 
-    def waiting(self):
-        self.left_wheel_speed = 0
-        self.right_wheel_speed = 0
 
     def dist_face_back(self, agent):
         # Extract the direction vector components(other agent)
@@ -428,61 +428,69 @@ class Agent(pg.sprite.Sprite):
             agent=self.nearby_agents[0]
             self.move_to(agent.rect.center,agents)
         else:
-            self.state='waiting'
+            self.state='wandering'
             self.wander()
 
-    def move_to(self, target,agents):
 
+    def move_to(self, target, agents):
+        # Ensure collision detection before movement
         self.check_Collision(agents)
-        self.direction_to_move= pg.Vector2(target[0] - self.rect.centerx, target[1] - self.rect.centery)
-
-        # Calculate the vector pointing to the target
-        self.direction = pg.Vector2(target[0] - self.rect.centerx, target[1] - self.rect.centery)
-
-        # Normalize the direction vector
-        if self.direction.length() > 0:
-            self.direction = self.direction.normalize()
-        else:
-            self.direction = pg.Vector2(1, 0)  # Default to moving right
-
-        # Calculate the angle to the target
-        angle_to_target = self.direction.angle_to(self.direction)
         
-        # Adjust wheel speeds based on the angle to the target using proportional control
+        # Calculate vector to the target
+        self.direction_to_move = pg.Vector2(target[0] - self.rect.centerx, target[1] - self.rect.centery)
+        # Calculate the vector pointing to the target
+        # Normalize the direction vector
+        if self.direction_to_move.length() > 0:
+            self.direction_to_move = self.direction_to_move.normalize()
+        else:
+            
+            self.direction_to_move = pg.Vector2(1,0).normalize()  # Default to moving right
+
+        # Calculate the angle between current and target direction
+        angle_to_target = self.direction.angle_to(self.direction_to_move)
+
+        # Adjust wheel speeds proportionally to the angle
         kp = 0.1  # Proportional gain
         rotation_speed = kp * angle_to_target
-
         self.left_wheel_speed = self.speed - rotation_speed
         self.right_wheel_speed = self.speed + rotation_speed
-
+        
+        # Clamp wheel speeds to valid ranges
         self.clamp_speed()
-        # self.check_Collision()        
+        
+        # Update position and direction
         self.update_position(agents)
 
-    def update_position(self, agents):
 
-        # Update the agent's position based on the left and right wheel speeds
+    def update_position(self, agents):
+        # Calculate velocity and rotation from wheel speeds
         velocity = (self.left_wheel_speed + self.right_wheel_speed) / 2
         rotation = (self.right_wheel_speed - self.left_wheel_speed) / self.wheel_distance
 
         # Update direction based on rotation
         if rotation != 0:
             angle = rotation * 180 / math.pi
-            self.direction.rotate_ip(angle)  # Adjusted sign for correct rotation direction
-        # Normalize direction
+            self.direction.rotate_ip(angle)
+        
+        # Ensure direction is normalized
         if self.direction.length() > 0:
             self.direction = self.direction.normalize()
         else:
-            self.direction = pg.Vector2(1, 0)  # Default to moving right
+            self.direction = pg.Vector2(1,0).normalize()
 
-        # Move agent in the direction it's facing
+        # Move in the direction of the velocity
         self.rect.center += self.direction * velocity
 
-        # Check for collision with screen boundaries and adjust position
+        # Check for collisions and boundaries
         self.check_boundaries()
         self.check_Collision(agents)
-        # Rotate agent's image to match its orientation
+
+        # Rotate image to match direction
         self.rotate_image()
+
+    def waiting(self):
+        self.left_wheel_speed = self.left_wheel_speed* 0
+        self.right_wheel_speed = self.right_wheel_speed* 0
 
     def check_Collision(self,agents):
         # collided_agent = pg.sprite.spritecollideany(self, self.nearby_agents)
@@ -503,7 +511,7 @@ class Agent(pg.sprite.Sprite):
         # Check if collision_vector is zero
         if collision_vector.length() == 0:
             # Move the agents slightly apart to avoid zero-length vector
-            collision_vector = pg.Vector2(1, 0)
+            collision_vector = pg.Vector2(1,0).normalize()
 
         collision_normal = collision_vector.normalize()
 
@@ -531,11 +539,12 @@ class Agent(pg.sprite.Sprite):
             self.direction = self.direction.normalize() * self.speed
         else:
             # Handle the zero vector case (e.g., assign a default direction)
-            self.direction = pg.Vector2(1, 0) * self.speed  # Default to moving right
+
+            self.direction = pg.Vector2(1,0).normalize() * self.speed  # Default to moving right
         if other.direction.length() > 0:
             other.direction = other.direction.normalize() * other.speed
         else:
-            self.direction = pg.Vector2(1, 0)  # Default to moving right
+            self.direction = pg.Vector2(1,0).normalize()
 
 
         # Adjust positions to avoid overlap
@@ -615,7 +624,7 @@ class Agent(pg.sprite.Sprite):
             # print("prob_of_female_mating",prob_of_female_mating)
             # print("random_num",random_num)
             # print("----------------------")
-            if random_num<prob_of_female_mating:
+            if random_num<=prob_of_female_mating:
                 # print("reproduced 3rd line")
 
                 # if male.age > 0 and female.age > 0 and female.can_reproduce and male.state == 'mating as male' and female.state == 'mating as female':
@@ -637,41 +646,42 @@ class Agent(pg.sprite.Sprite):
 
                             self.no_of_matings_as_female=self.no_of_matings_as_female+2
                             male.no_of_matings_as_male=self.no_of_matings_as_male+2
-                            for i in range(num_children):
-                                # print("prob_of_female_mating-success",prob_of_female_mating)
-                                # print("random_num-success",random_num)
-                                # print("++++++++++++++++")
-                                child_genome1=Genome()
-                                child_genome2=Genome()
-                                if i==0:
-                                    child_genome1.gene=child_genome1.reproduce(child_genome1.gene, male_genome.gene, female_genome.gene,"m")
-                                if i==1:
-                                    child_genome2.gene=child_genome2.reproduce(child_genome2.gene,female_genome.gene, male_genome.gene, "f")
+                            # for i in range(num_children):
+                            # print("prob_of_female_mating-success",prob_of_female_mating)
+                            # print("random_num-success",random_num)
+                            # print("++++++++++++++++")
+                            child_genome1=Genome()
+                            child_genome2=Genome()
+                            # if i==0:
+                                # child_genome1.gene=child_genome1.reproduce(child_genome1.gene, male_genome.gene, female_genome.gene,"m")
+                            # print("male_genome",male_genome.gene)
+                            # print("female_genome",female_genome.gene)
+                            child_genome1.gene,child_genome2.gene=child_genome1.reproduce(male_genome.gene, female_genome.gene)
+                            # print("child_genome1",child_genome1.gene)
+                            # print("child_genome2",child_genome2.gene)
+                            # if i==1:
+                            #     child_genome2.gene=child_genome2.reproduce(child_genome2.gene,female_genome.gene, male_genome.gene, "f")
+                            c.female_parent.append(female_genome)
+                            c.male_parent.append(male_genome)
+                            
+                            new_pos1 = (random.randint(0, c.screen_width), random.randint(0, c.screen_height))
+                            new_pos2 = (random.randint(0, c.screen_width), random.randint(0, c.screen_height))
 
-                                c.female_parent.append(female_genome)
-                                c.male_parent.append(male_genome)
-                                
+                            new_generation_no = max(self.generation_no, other.generation_no) + 1
+                            new_energy_level =  100
+                            new_body_size = 6 
+                            # if i==0:
+                            new_agent1 = Agent(new_pos1, new_generation_no, new_energy_level, new_body_size,child_genome1,time.time())
+                            agent_group2.add(new_agent1)
+                            c.agents2.append(new_agent1)
 
-                                new_pos = (random.randint(0, c.screen_width), random.randint(0, c.screen_height))
+                            new_agent2 = Agent(new_pos2, new_generation_no, new_energy_level, new_body_size,child_genome2,time.time())
+                            agent_group2.add(new_agent2)
+                            c.agents2.append(new_agent2)
+                            # c.ge2.append(child_genome)
+                            # print("reproduced")
+                            c.genome_id.append(c.genomeid)
 
-
-                                new_generation_no = max(self.generation_no, other.generation_no) + 1
-                                new_energy_level =  100
-                                new_body_size = 6 
-                                if i==0:
-                                    new_agent = Agent(new_pos, new_generation_no, new_energy_level, new_body_size,child_genome1,time.time())
-                                    agent_group2.add(new_agent)
-                                    c.agents2.append(new_agent)
-                                # c.ge2.append(child_genome)
-                                # print("reproduced")
-                                    c.genome_id.append(c.genomeid)
-                                if i==1:
-                                    new_agent = Agent(new_pos, new_generation_no, new_energy_level, new_body_size,child_genome2,time.time())
-                                    agent_group2.add(new_agent)
-                                    c.agents2.append(new_agent)
-                                # c.ge2.append(child_genome)
-                                # print("reproduced")
-                                    c.genome_id.append(c.genomeid)                                
 
                             female.energy_level -= 8
                             female.can_reproduce = False  # Female needs to wait until aging to reproduce again
@@ -701,7 +711,7 @@ class Agent(pg.sprite.Sprite):
     def eat(self, food_group):
         collided_food = pg.sprite.spritecollideany(self, food_group)
         if collided_food:
-            if self.energy_level < c.max_energy:
+            if self.energy_level < c.max_energy-50:
                 self.energy_level += collided_food.energy
 
             collided_food.kill()
@@ -814,42 +824,30 @@ class Agent(pg.sprite.Sprite):
 
         if self.age > 4750:
             self.kill()
-   
+    
     def calculate_movement_direction(self):
-        if self.left_wheel_speed == 0 and self.right_wheel_speed == 0:
-            if self.left_wheel_speed>4.5:
-                print("self.left_wheel_speed in search_for_food",self.left_wheel_speed)
-            
+        # print("self.left_wheel_speed in search_for_food", self.left_wheel_speed)
+        # print("self.right_wheel_speed in search_for_food", self.right_wheel_speed)
 
-            if self.right_wheel_speed>4.5:
-                print("self.right_wheel_speed in search_for_food",self.right_wheel_speed)
+        # Debug log for wheel speeds greater than 4.5
+        if self.left_wheel_speed > 4.5:
+            print("self.left_wheel_speed in search_for_food", self.left_wheel_speed)
+        if self.right_wheel_speed > 4.5:
+            print("self.right_wheel_speed in search_for_food", self.right_wheel_speed)
+
+        # Determine movement direction
+        if self.left_wheel_speed == 0 and self.right_wheel_speed == 0:
             return "Stationary"
         elif self.left_wheel_speed == self.right_wheel_speed:
-            if self.left_wheel_speed>4.5:
-                print("self.left_wheel_speed in search_for_food",self.left_wheel_speed)
-            
-
-            if self.right_wheel_speed>4.5:
-                print("self.right_wheel_speed in search_for_food",self.right_wheel_speed)
             return "Straight" if self.left_wheel_speed > 0 else "Backward"
         elif self.left_wheel_speed == -self.right_wheel_speed:
-            if self.left_wheel_speed>4.5:
-                print("self.left_wheel_speed in search_for_food",self.left_wheel_speed)
-            
-
-            if self.right_wheel_speed>4.5:
-                print("self.right_wheel_speed in search_for_food",self.right_wheel_speed)
             return "Rotating right on fixed position" if self.left_wheel_speed > 0 else "Rotating left on fixed position"
         elif self.left_wheel_speed < self.right_wheel_speed:
-            if self.left_wheel_speed>4.5:
-                print("self.left_wheel_speed in search_for_food",self.left_wheel_speed)
-            
-
-            if self.right_wheel_speed>4.5:
-                print("self.right_wheel_speed in search_for_food",self.right_wheel_speed)
             return "Turning left"
         else:
+            # Added debug log for "Turning right"
+            if self.left_wheel_speed > 4.5:
+                print("self.left_wheel_speed in search_for_food", self.left_wheel_speed)
             return "Turning right"
-        
 
 

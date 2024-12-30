@@ -7,10 +7,13 @@ import random
 import threading
 import time
 import matplotlib.pyplot as plt
-from infofunc import screen, prnt, checkmouse, envtime, createAgent,agent_fitness,inter_genome,best_fitness_genome,save_genomes,upload_gen_info,load_genomes,cloneAgent
+from infofunc import screen, prnt, prnt1,checkmouse, envtime, createAgent,agent_fitness,inter_genome,best_fitness_genome,save_genomes,upload_gen_info,load_genomes,cloneAgent
 import numpy as np
 from genome import Genome
 from nn import NeuralNetwork
+import copy
+from retrivegenome import retrivegenome, retriveselectedgenome
+
 # Initialize pygame
 pg.init()
 
@@ -18,15 +21,15 @@ pg.init()
 clock = pg.time.Clock()
 
 # Create game window
-# screen = pg.display.set_mode((c.screen_width, c.screen_height))
-# pg.display.set_caption("Alternative reproductive tactics (ARTs)")
+screen = pg.display.set_mode((c.screen_width+100, c.screen_height+100))
+pg.display.set_caption("Alternative reproductive tactics (ARTs)")
 
-screen = pg.Surface((c.screen_width, c.screen_height))  # Replace pg.display.set_mode
 
 # Create groups
 agent_group = pg.sprite.Group()
 food_group = pg.sprite.Group()
 agent_group2 = pg.sprite.Group()
+agent_group3 = pg.sprite.Group()
 
 pop_set_num=1
 
@@ -37,11 +40,17 @@ for _ in range(initial_food):
     food = Food()
     food_group.add(food)
 
-# Initial agent population
-initial_population = 100
-for _ in range(initial_population):
-    gene=Genome()
-    inter_genome(gene,agent_group)
+initialization="retrive"
+if initialization=="retrive":
+    retrivegenome("dead_agents_info100popafterselectionperfectionpart1.pkl",agent_group)
+elif initialization=="retriveselectedgenome":
+    retriveselectedgenome("dead_agents_info100popafterselectionperfectionpart1.pkl",agent_group,83)
+elif initialization=="start":
+    # Initial agent population
+    initial_population = c.totalpop
+    for _ in range(initial_population):
+        gene=Genome()
+        inter_genome(gene,agent_group,1)#1 is the gen_num(generation number)
  
 
 start_time = time.time()
@@ -60,12 +69,21 @@ while run:
         #neural network output taken
         # input=Agent.data()
         
-        for agent in agent_group:
-            if agent.mating_state_timer==4:#not in mating period
+        for i,agent in enumerate(agent_group):
+            # if i <20:
+            #     print(f"Inputs for agent  {agent.data()}")
+            # else:
+            #     print("=====================================")    
+            if agent.mating_state_timer==c.mating_state_timer_counter:#not in mating period
                 nn=NeuralNetwork()
+                # print("agent : ", i)
+                # print("agent data: ", agent.data())
                 output=nn.forward(agent.data(),agent.genome.gene)
 
-
+                # if i <20:
+                #     print(f"output for agent  {output}")
+                # else:
+                #     print("=====================================")    
                 output_0=output[0]
                 output_1=output[1]
                 output_2=output[2]
@@ -91,7 +109,7 @@ while run:
                     if max_output_key == "output_0":
                         agent.state = 'moving_to_food'
                     if max_output_key == "output_1":
-                        agent.state = 'waiting'
+                        agent.state = 'Aproach_towards_nearest'
                     if max_output_key == "output_2": 
                         agent.state = 'mating as male'
                     if max_output_key == "output_3":
@@ -113,20 +131,22 @@ while run:
                             if third_best_key == "output_0":
                                 agent.state = 'moving_to_food'
                             if third_best_key == "output_1":
-                                agent.state = 'waiting'
+                                agent.state = 'Aproach_towards_nearest'
 
                         else:
                             if second_best_output == "output_0":
                                 agent.state = 'moving_to_food'
                             if second_best_output == "output_1":
-                                agent.state = 'waiting'
+                                agent.state = 'Aproach_towards_nearest'
 
 
-                        c.update_agent_info(agent,output[5]) 
+                        # c.update_agent_info(agent,output[5]) 
 
             
             if agent.mating_state_timer<4:#checks if in mating state.
                 agent.state = agent.state
+
+        
 
         # Updating groups
         agent_group.update(agent_group,agent_group2, food_group)
@@ -135,6 +155,7 @@ while run:
 
     else:
         c.update_loop_counter(0)
+
 
         upload_gen_info()#uploading the genrationinfo
         c.pop_set_num +=1
@@ -147,30 +168,50 @@ while run:
         c.clear_ge()
 
         print("size of children list:",agent_group2)
+
+        # for agent in agent_group2:
+        #     print(agent.generation_no)
         # Randomly select agents from `agent_group2` until `agent_group` reaches 100 agents
         # if len(agent_group2)>120:
-        if len(agent_group2)>125:
-            for new_agent in agent_group2:
-                if len(agent_group)<100:
-                    choice=random.choice(["y","n"])
-                    if choice == "y":
-                        agent_group.add(new_agent)
-                        c.dead_agent_bucket_list.append(new_agent)
-                        c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
-        else:
-            for new_agent in agent_group2:
-                if len(agent_group)<=100:
-                    agent_group.add(new_agent)
-                    c.dead_agent_bucket_list.append(new_agent)
-                    c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
 
-        loop=100-len(agent_group)
+        totl=c.totalpop
+
+        if len(agent_group2)>=totl:
+
+            size=len(agent_group2)
+            list_for_random = list(range(size))
+            random_selection = random.sample(list_for_random, 100)
+            random_selection.sort()
+            j=0
+            for i,agent in enumerate(agent_group2):
+                if j < len(random_selection) and i==random_selection[j]:
+                    agent_group.add(agent)
+                    c.dead_agent_bucket_list.append(agent)
+                    c.update_ge(agent.genome)  # Remove from agent_group2 to avoid duplicates
+                    j=j+1
+        
+        elif len(agent_group2)<totl:
+            for agent in agent_group2:
+                agent_group.add(agent)
+                c.dead_agent_bucket_list.append(agent)
+                c.update_ge(agent.genome)  # Remove from agent_group2 to avoid duplicates
+        
+        elif len(agent_group2)==0:
+
+            for agent in agent_group3:
+                inter_genome(agent.genome,agent_group,agent.generation_no)
+
+
+        loop=c.totalpop-len(agent_group)
         if loop>0:
             for _ in range(loop):
-                gene=Genome()
-                inter_genome(gene,agent_group)
+                gene=Genome() 
+                inter_genome(gene,agent_group,1)#1 because new genome creation
+        agent_group3.empty()
+        for agent in agent_group:
+            agent_group3.add(agent)
+        
         agent_group2.empty()
-
 
         checkmouse(agent_group)
 
@@ -181,23 +222,23 @@ while run:
     clock_time = time.time() - start_time
     sec, min, hour = envtime(clock_time)
 
-    checkmouse(agent_group)
+    # checkmouse(agent_group)
 
     # Print the number of agents on the screen
-    population = len(agent_group)
-    if population > 0:
-        highest_generation = max(agent.generation_no for agent in agent_group)
-        font = pg.font.Font(None, 20)
-        text = font.render(f"Population: {population} Highest Generation: {highest_generation}", True, c.WHITE)
-    text2 = font.render(f"CLOCK : {hour} hr: {min} min: {sec} sec", True, c.WHITE)
-    text4 = font.render(f"Population set number: {c.pop_set_num}", True, c.WHITE)
-    text3 = font.render(f"Agents children length: {len(agent_group2)}", True, c.WHITE)
-    text5 = font.render(f"No. of food: {len(food_group)}", True, c.WHITE)
-    prnt(text5, 0.7)
-    prnt(text3, 0.5)
-    prnt(text2, 0.8)
-    prnt(text4, 0.3)
-    prnt(text, 0.01)
+    # population = len(agent_group)
+    # if population > 0:
+    #     highest_generation = max(agent.generation_no for agent in agent_group)
+    #     font = pg.font.Font(None, 12)
+    #     text = font.render(f"Population: {population} Highest Generation: {highest_generation}", True, c.WHITE)
+    # text2 = font.render(f": {hour} hr: {min} min: {sec} sec", True, c.WHITE)
+    # text4 = font.render(f"Population number: {c.pop_set_num}", True, c.WHITE)
+    # text3 = font.render(f"children length: {len(agent_group2)}", True, c.WHITE)
+    # text5 = font.render(f"No. of food: {len(food_group)}", True, c.WHITE)
+    # # prnt1(text5, 0.7)
+    # prnt1(text3, 0.5)
+    # prnt1(text2, 0.01)
+    # prnt(text4, 0.6)
+    # prnt(text, 0.01)
 
     # Event handler
     for event in pg.event.get():

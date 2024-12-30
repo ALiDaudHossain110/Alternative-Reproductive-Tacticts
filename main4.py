@@ -42,9 +42,9 @@ for _ in range(initial_food):
 
 initialization="start"
 if initialization=="retrive":
-    retrivegenome("dead_agents_info_todayfinalpart2.pkl",agent_group)
+    retrivegenome("dead_agents_info100popafterselectionperfectionpart1.pkl",agent_group)
 elif initialization=="retriveselectedgenome":
-    retriveselectedgenome("dead_agents_info_todayfinalpart2.pkl",agent_group,114)
+    retriveselectedgenome("dead_agents_info100popafterselectionperfectionpart1.pkl",agent_group,83)
 elif initialization=="start":
     # Initial agent population
     initial_population = c.totalpop
@@ -169,66 +169,38 @@ while run:
 
         print("size of children list:",agent_group2)
 
+        # for agent in agent_group2:
+        #     print(agent.generation_no)
         # Randomly select agents from `agent_group2` until `agent_group` reaches 100 agents
         # if len(agent_group2)>120:
+
         totl=c.totalpop
-        fsttotl=0.5*c.totalpop
+
         if len(agent_group2)>=totl:
-            for new_agent in agent_group2:
-                if len(agent_group)<c.totalpop:
-                    choice=random.choice(["y","n"])
-                    if choice == "y":
-                        agent_group.add(new_agent)
-                        c.dead_agent_bucket_list.append(new_agent)
-                        c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
+
+            size=len(agent_group2)
+            list_for_random = list(range(size))
+            random_selection = random.sample(list_for_random, 100)
+            random_selection.sort()
+            j=0
+            for i,agent in enumerate(agent_group2):
+                if j < len(random_selection) and i==random_selection[j]:
+                    agent_group.add(agent)
+                    c.dead_agent_bucket_list.append(agent)
+                    c.update_ge(agent.genome)  # Remove from agent_group2 to avoid duplicates
+                    j=j+1
         
-        #if less offsprings...
-        else:
-            # print("1")
-            if len(agent_group2)==0:
-                # print("2")
+        elif len(agent_group2)<totl:
+            for agent in agent_group2:
+                agent_group.add(agent)
+                c.dead_agent_bucket_list.append(agent)
+                c.update_ge(agent.genome)  # Remove from agent_group2 to avoid duplicates
+        
+        elif len(agent_group2)==0:
 
-                # agent_group = pg.sprite.Group(copy.deepcopy(agent) for agent in agent_group3)
-                for agent in agent_group3:
-                    # print("1,,")
-                    if len(agent_group)<fsttotl:
-                        inter_genome(agent.genome,agent_group,agent.generation_no)
+            for agent in agent_group3:
+                inter_genome(agent.genome,agent_group,agent.generation_no)
 
-
-            if len(agent_group2)<=fsttotl and len(agent_group2)>0:
-                # print("2")
-
-                while len(agent_group) < fsttotl:
-                    # print("111")
-
-                    for new_agent in agent_group2:
-                        if len(agent_group)<fsttotl:
-                            # print("add")
-                            inter_genome(new_agent.genome,agent_group,new_agent.generation_no)
-                        else:
-                            # print("length",len(agent_group))
-                            break
-
-            if len(agent_group2)>=fsttotl and len(agent_group2)<totl and len(agent_group2)>0:
-                # print("2")
-
-                    # print("111")
-
-                for new_agent in agent_group2:
-                    if len(agent_group)<totl:
-                        # print("add")
-                        inter_genome(new_agent.genome,agent_group,new_agent.generation_no)
-                    else:
-                        # print("length",len(agent_group))
-                        break
-
-            # else:
-
-            #     for new_agent in agent_group2:
-            #         if len(agent_group)<=c.totalpop:
-            #             agent_group.add(new_agent)
-            #             c.dead_agent_bucket_list.append(new_agent)
-            #             c.update_ge(new_agent.genome)  # Remove from agent_group2 to avoid duplicates
 
         loop=c.totalpop-len(agent_group)
         if loop>0:
@@ -236,12 +208,10 @@ while run:
                 gene=Genome() 
                 inter_genome(gene,agent_group,1)#1 because new genome creation
         agent_group3.empty()
-        # agent_group3 = pg.sprite.Group(copy.deepcopy(agent) for agent in agent_group)
-        #making a copy of the agents list going into the next generation, if the generation fails to make any offspring this will used to repopulate the next genso tht evolution is not lost.
         for agent in agent_group:
-            agent_group3.add(createAgent(agent.genome,agent.birth_time,agent.generation_no))
+            agent_group3.add(agent)
+        
         agent_group2.empty()
-
 
         checkmouse(agent_group)
 

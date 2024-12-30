@@ -11,40 +11,55 @@ class Genome():
         self.id=c.geneCounter
         c.update_geneCounter(c.geneCounter+1)
 
-    def reproduce(self, genome,male_genome, female_genome,g):
+    def reproduce(self, male_genome, female_genome):
         
-        
-        offspring_gene=self.Mutate(self.CrossOver(genome,male_genome,female_genome,g), mutation_rate=0.1, standard_deviation=0.1)
-        return offspring_gene
+        g1,g2=self.CrossOver(male_genome,female_genome)
+        offspring_gene1,offspring_gene2=self.Mutate(g1,g2, mutation_rate=0.1, standard_deviation=0.1)
+        return offspring_gene1,offspring_gene2
 
-    def CrossOver(self, offspring_gene, male_genome, female_genome,g,crossover_rate=0.1):
+    def CrossOver(self, male_genome, female_genome,crossover_rate=0.1):
+
+
+        offspring_1=male_genome
+        offspring_2=female_genome
 
         if np.random.rand() < crossover_rate:  # Check if crossover occurs
-            # Take the first half from the male genome
-            crossover_point=random.randint(1,4)
-            for i in range(4):
-                for j in range(crossover_point):  # First half (columns 0 to 3)
-                    offspring_gene[i][j] = male_genome[i][j]
 
-            # Take the second half from the female genome
-            for i in range(4):
-                for j in range(crossover_point, 4):  # Second half (columns 4 to 6)
-                    offspring_gene[i][j] = female_genome[i][j]
-            print("cross_Over has been done on",g)
+
+            male_genome_flat = np.array(male_genome).flatten()
+            female_genome_flat = np.array(female_genome).flatten()
+            # Select a random crossover point (between 1 and length - 1)
+            crossover_point = np.random.randint(1, len(male_genome_flat))
+
+            # Perform the crossover
+            offspring_flat_1 = np.concatenate([
+                male_genome_flat[:crossover_point],  # Take first part from male
+                female_genome_flat[crossover_point:]  # Take second part from female
+            ])
+
+            offspring_flat_2 = np.concatenate([
+                female_genome_flat[:crossover_point],  # Take first part from male
+                male_genome_flat[crossover_point:]  # Take second part from female
+            ])
+
+            # Reshaping the genom back to the original 2D shape
+            offspring_1 = offspring_flat_1.reshape(len(male_genome), len(male_genome[0]))
+            offspring_2 = offspring_flat_2.reshape(len(male_genome), len(male_genome[0]))
+            print("cross over has been done on the offspring")
+            return offspring_1 ,offspring_2
+
+
+
+
+
+
         
-        else:
-
-            if g=="m":
-                offspring_gene=male_genome
-            if g=="f":
-                offspring_gene=female_genome
         
-        
-        return offspring_gene
+        return offspring_1,offspring_2
 
 
 
-    def Mutate(self, offspring_gene, mutation_rate=0.1,standard_deviation=0.1):
+    def Mutate(self, offspring_gene1,offspring_gene2, mutation_rate=0.1,standard_deviation=0.1):
 
         if np.random.rand() < mutation_rate:  # Check if mutation occurs
             # random_row=random.randint(0,5)
@@ -56,12 +71,23 @@ class Genome():
                 for j in range(4):
                         # mutation = np.random.uniform(-mutation_amount, mutation_amount)  # Random change
                         mutation = np.random.normal(0, standard_deviation)  # Gaussian mutation
-                        offspring_gene[i][j] += mutation  # Apply mutation
+                        offspring_gene1[i][j] += mutation  # Apply mutation
                         # Ensure the mutated value is within bounds (e.g., 0 to 1)
                         # offspring_gene[i][j] = np.clip(offspring_gene[i][j], -1, 1)
+            for i in range(6):
+                for j in range(4):
+                        # mutation = np.random.uniform(-mutation_amount, mutation_amount)  # Random change
+                        mutation = np.random.normal(0, standard_deviation)  # Gaussian mutation
+                        offspring_gene2[i][j] += mutation  # Apply mutation
+                        # Ensure the mutated value is within bounds (e.g., 0 to 1)
+                        # offspring_gene[i][j] = np.clip(offspring_gene[i][j], -1, 1)
+
+
+
+
             print("Mutation has been done on child")
 
-        return offspring_gene
+        return offspring_gene1,offspring_gene2
 
     
 
