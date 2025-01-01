@@ -80,6 +80,43 @@ class Agent(pg.sprite.Sprite):
         i-=1
         self.state_counter_dict[self.state][i]= int(self.state_counter_dict[self.state][i])+1
 
+
+
+    def visualize_vision(self, surface):
+        # Vision cone parameters
+        vision_radius = self.sight_radius
+        vision_angle = self.vision_angle  # FOV in degrees
+
+        # Agent's position
+        agent_pos = pg.Vector2(self.rect.center)
+
+        # Starting direction (central axis of the cone)
+        direction_angle = math.atan2(self.direction.y, self.direction.x)
+
+        # Calculate the start and end angles for the cone
+        start_angle = direction_angle - math.radians(vision_angle / 2)
+        end_angle = direction_angle + math.radians(vision_angle / 2)
+
+        # Points for the vision cone
+        points = [agent_pos]  # Start with the agent's position
+
+        # Add points along the vision cone's boundary
+        num_segments = 20  # Number of segments to approximate the arc
+        for i in range(num_segments + 1):
+            angle = start_angle + i * (end_angle - start_angle) / num_segments
+            x = agent_pos.x + vision_radius * math.cos(angle)
+            y = agent_pos.y + vision_radius * math.sin(angle)
+            points.append((x, y))
+
+        # Create a transparent surface
+        fov_surface = pg.Surface(surface.get_size(), pg.SRCALPHA)  # Use SRCALPHA for transparency
+
+        # Draw the cone on the transparent surface
+        pg.draw.polygon(fov_surface, (0, 0, 255, 50), points)  # (R, G, B, A) with A for transparency
+
+        # Blit the transparent surface onto the main surface
+        surface.blit(fov_surface, (0, 0))
+
     def update(self, agents, agent_group2, food_group):
         self.age = c.loop_counter
         self.state_stat()
@@ -120,6 +157,7 @@ class Agent(pg.sprite.Sprite):
                 # Do not reset the timer here. It should be reset after mating.
 
         self.update_position(agents)
+        self.visualize_vision(screen)  # Call the visualization method here
 
         self.rect = self.image.get_rect(center=self.rect.center)
 

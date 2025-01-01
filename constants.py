@@ -3,12 +3,12 @@ import pygame as pg
 import numpy as np
 
 clock = pg.time.Clock()
-totalpop=100
+totalpop=10
 food_population=100
 
 # Screen dimensions
-screen_width = 500
-screen_height = 500
+screen_width = 1000
+screen_height = 600
 
 
 max_energy=300
@@ -41,7 +41,8 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 YELLOW = (0, 0, 255)  # Added for the marker color
-
+LIGHT_BLUE=(173,216,230)
+BLUE=(173,216,20)
 # Time intervals
 age_increment_interval = 25  # seconds
 food_spawn_chance = 0.1  # Adjust the value as needed
